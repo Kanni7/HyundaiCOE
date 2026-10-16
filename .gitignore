@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.env
+recordings/
+# model weights live in the Hugging Face / Ollama caches, never in the repo
+models/
+*.bin
+*.gguf
+*.safetensors
+# V2: trained artifacts, embedding caches, user profiles and real recordings are never committed
+artifacts/
+data/profiles/
+samples/real/
+reports/_asr_items.json
+*.onnx
+*.npz
+*.sqlite

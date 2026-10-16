@@ -1,0 +1,20 @@
+{
+  "encoder": "paraphrase-multilingual-MiniLM-L12-v2",
+  "n_sentences": 2110,
+  "export_and_quantize_s": 12.1,
+  "size_mb": {
+    "safetensors_fp32": 448.8,
+    "onnx_fp32": 448.4,
+    "onnx_int8": 112.6
+  },
+  "cosine_vs_torch_onnx_fp32": {
+    "mean": 1.0,
+    "min": 1.0,
+    "p01": 1.0
+  },
+  "cosine_vs_torch_onnx_int8": {
+    "mean": 0.98586,
+    "min": 0.85933,
+    "p01": 0.93569
+  }
+}

@@ -1,0 +1,12 @@
+[
+  {"id": "s01_freezing_en", "voice_lang": "en-IN", "text": "I'm freezing.", "expected_intent": "climate_adjust_temperature"},
+  {"id": "s02_volume_hinglish", "voice_lang": "en-IN", "text": "Bhai, volume thoda badha do.", "expected_intent": "volume_adjust"},
+  {"id": "s03_ac_warm_hinglish", "voice_lang": "en-IN", "text": "AC ka temperature thoda warm kar do.", "expected_intent": "climate_adjust_temperature"},
+  {"id": "s04_ac_negation_hinglish", "voice_lang": "en-IN", "text": "AC band mat karna.", "expected_intent": "climate_ac_power"},
+  {"id": "s05_fan_en", "voice_lang": "en-IN", "text": "Not the temperature, reduce the fan speed.", "expected_intent": "fan_adjust_speed"},
+  {"id": "s06_next_hinglish", "voice_lang": "en-IN", "text": "Agla gaana lagao.", "expected_intent": "media_next_track"},
+  {"id": "s07_nav_en", "voice_lang": "en-IN", "text": "Take me to Connaught Place.", "expected_intent": "navigation_search"},
+  {"id": "s08_set_temp_en", "voice_lang": "en-US", "text": "Set the cabin to twenty four degrees.", "expected_intent": "climate_set_temperature"},
+  {"id": "s09_pause_en", "voice_lang": "en-US", "text": "Pause the music please.", "expected_intent": "media_pause"},
+  {"id": "s10_ood_en", "voice_lang": "en-US", "text": "The meeting went really well today.", "expected_intent": "none"}
+]

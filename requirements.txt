@@ -1,0 +1,27 @@
+# ---- V2 runtime (all inference local; no LLM, no cloud) ----
+sherpa-onnx==1.13.8          # on-device ASR runtime (hi-hinglish-swift Whisper export)
+onnxruntime==1.31.0          # sentence-encoder inference (INT8)
+tokenizers                   # Rust tokenizer for the encoder (installed with transformers)
+numpy==2.5.4
+pydantic==2.14.1
+soundfile==0.14.0
+sounddevice==0.5.6
+psutil==7.2.2
+python-dotenv==1.2.4
+huggingface_hub              # one-time model download only (scripts/download_models.py)
+# Local API / test page
+fastapi==0.143.3
+uvicorn==0.54.0
+python-multipart
+httpx==0.28.1
+# ---- Training, export and evaluation (development machine only) ----
+torch==2.14.1
+transformers==5.20.1
+sentence-transformers==6.1.0
+scikit-learn==1.9.1
+onnx==1.23.2
+# ---- Tests ----
+pytest==9.1.1
+# ---- Optional V1 development benchmark (Whisper + Ollama/Qwen), not used by the V2 runtime ----
+faster-whisper==1.2.1
+ctranslate2==4.8.3

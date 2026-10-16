@@ -1,0 +1,254 @@
+{
+ "val": [
+  {
+   "teach": "When I say 'make it cozy', set the temperature to 22 degrees.",
+   "trigger": "make it cozy",
+   "intent": "climate_temperature_set",
+   "params": {
+    "target_temperature_celsius": 22
+   },
+   "uses": [
+    "make it cozy",
+    "Make it cozy."
+   ],
+   "paraphrases": [
+    "make it cozy please",
+    "make it nice and cozy",
+    "cozy it up"
+   ],
+   "negatives": [
+    "don't make it cozy",
+    "what does 'make it cozy' do?",
+    "make it louder",
+    "it's cold outside"
+   ]
+  },
+  {
+   "teach": "Jab main 'chill mode' bolun, AC 22 pe set kar dena.",
+   "trigger": "chill mode",
+   "intent": "climate_temperature_set",
+   "params": {
+    "target_temperature_celsius": 22
+   },
+   "uses": [
+    "chill mode",
+    "Chill mode"
+   ],
+   "paraphrases": [
+    "Chill mode, yaar.",
+    "chill mode on karo",
+    "chill mode please"
+   ],
+   "negatives": [
+    "Don't use chill mode",
+    "chill mode mat karo",
+    "what is 'chill mode'?",
+    "chilli paneer order karo"
+   ]
+  },
+  {
+   "teach": "When I say 'party time', turn the volume up.",
+   "trigger": "party time",
+   "intent": "volume_up",
+   "params": {},
+   "uses": [
+    "party time"
+   ],
+   "paraphrases": [
+    "it's party time",
+    "party time yaar",
+    "party time, let's go"
+   ],
+   "negatives": [
+    "no party time today",
+    "it's lunch time",
+    "what time is the party?"
+   ]
+  },
+  {
+   "teach": "Jab main 'shanti' bolun, gaana pause kar do.",
+   "trigger": "shanti",
+   "intent": "media_pause",
+   "params": {},
+   "uses": [
+    "shanti",
+    "Shanti!"
+   ],
+   "paraphrases": [
+    "shanti please",
+    "thodi shanti"
+   ],
+   "negatives": [
+    "shanti mat karo",
+    "Shantanu ko call karo",
+    "bahut shor hai"
+   ]
+  },
+  {
+   "teach": "When I say 'office route', navigate to Cyber Hub.",
+   "trigger": "office route",
+   "intent": "navigation_destination_request",
+   "params": {
+    "destination": "Cyber Hub"
+   },
+   "uses": [
+    "office route"
+   ],
+   "paraphrases": [
+    "office route please",
+    "take the office route"
+   ],
+   "negatives": [
+    "don't take the office route",
+    "office mein meeting hai",
+    "home route"
+   ]
+  }
+ ],
+ "test": [
+  {
+   "teach": "When I say 'freeze mode', set the temperature to 18 degrees.",
+   "trigger": "freeze mode",
+   "intent": "climate_temperature_set",
+   "params": {
+    "target_temperature_celsius": 18
+   },
+   "uses": [
+    "freeze mode",
+    "Freeze mode."
+   ],
+   "paraphrases": [
+    "freeze mode please",
+    "freeze mode on karo",
+    "activate freeze mode"
+   ],
+   "negatives": [
+    "don't use freeze mode",
+    "freeze mode mat lagao",
+    "what does 'freeze mode' mean?",
+    "my phone froze"
+   ]
+  },
+  {
+   "teach": "Jab main 'dhamaka' bolun, volume badha dena.",
+   "trigger": "dhamaka",
+   "intent": "volume_up",
+   "params": {},
+   "uses": [
+    "dhamaka",
+    "Dhamaka!"
+   ],
+   "paraphrases": [
+    "dhamaka yaar",
+    "dhamaka kar do",
+    "full dhamaka"
+   ],
+   "negatives": [
+    "dhamaka mat karo",
+    "news mein dhamake ki khabar thi",
+    "what is 'dhamaka'?"
+   ]
+  },
+  {
+   "teach": "When I say 'quiet please', pause the music.",
+   "trigger": "quiet please",
+   "intent": "media_pause",
+   "params": {},
+   "uses": [
+    "quiet please",
+    "Quiet please."
+   ],
+   "paraphrases": [
+    "quiet please yaar",
+    "some quiet please"
+   ],
+   "negatives": [
+    "don't be quiet",
+    "it's quiet outside",
+    "play some music"
+   ]
+  },
+  {
+   "teach": "When I say 'ghar chalo', navigate to Lajpat Nagar.",
+   "trigger": "ghar chalo",
+   "intent": "navigation_destination_request",
+   "params": {
+    "destination": "Lajpat Nagar"
+   },
+   "uses": [
+    "ghar chalo",
+    "Ghar chalo."
+   ],
+   "paraphrases": [
+    "ghar chalo yaar",
+    "chalo ghar",
+    "ghar le chalo"
+   ],
+   "negatives": [
+    "ghar mat chalo abhi",
+    "ghar pe khana hai",
+    "what does 'ghar chalo' do?"
+   ]
+  },
+  {
+   "teach": "When I say 'warm hug', make it warmer.",
+   "trigger": "warm hug",
+   "intent": "climate_temperature_up",
+   "params": {},
+   "uses": [
+    "warm hug"
+   ],
+   "paraphrases": [
+    "warm hug please",
+    "give me a warm hug"
+   ],
+   "negatives": [
+    "no warm hug",
+    "hug my mom",
+    "warm milk"
+   ]
+  },
+  {
+   "teach": "Jab main 'agla dhun' bolun, next song chala do.",
+   "trigger": "agla dhun",
+   "intent": "media_next",
+   "params": {},
+   "uses": [
+    "agla dhun"
+   ],
+   "paraphrases": [
+    "agla dhun bajao",
+    "agla dhun please"
+   ],
+   "negatives": [
+    "agla dhun mat lagao",
+    "dhoop bahut hai"
+   ]
+  }
+ ],
+ "unrelated": [
+  "turn the volume down",
+  "set the temperature to 24",
+  "navigate to India Gate",
+  "pause the music",
+  "what's the weather",
+  "call mom",
+  "I'm feeling cold",
+  "next song",
+  "open the window",
+  "how are you",
+  "mode change karo",
+  "AC on karo",
+  "gaana chalao",
+  "office jaana hai",
+  "time kya hua hai",
+  "make it quick",
+  "party",
+  "freeze",
+  "quiet",
+  "hug",
+  "chill",
+  "ghar",
+  "route"
+ ]
+}

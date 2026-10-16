@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BhashaDrive Test Console</title>
+<style>
+  :root { --bg:#f6f7f9; --fg:#1b1f24; --muted:#5b6470; --card:#fff; --line:#d8dde3; --accent:#0b5cad; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#14171b; --fg:#e7eaee; --muted:#9aa4af; --card:#1d2126; --line:#2e343b; --accent:#5aa2ef; } }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.45 system-ui, sans-serif; }
+  main { max-width:900px; margin:0 auto; padding:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px; margin:12px 0; }
+  input[type=text] { width:100%; box-sizing:border-box; padding:10px; font-size:16px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--fg); }
+  button { padding:8px 14px; margin:8px 6px 0 0; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:6px; cursor:pointer; }
+  button.secondary { background:transparent; color:var(--accent); }
+  pre { white-space:pre-wrap; word-break:break-word; font-size:13px; color:var(--muted); }
+  .say { font-size:18px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; }
+  .row > div { flex:1 1 260px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>BhashaDrive test console</h1>
+  <p style="color:var(--muted)">Local prototype. Speech and text are processed on this machine; the car is a simulator.</p>
+  <div class="card">
+    <input id="t" type="text" placeholder="Type what the driver says, e.g. Bhai, volume thoda badha do">
+    <button id="send">Send text</button>
+    <button id="rec" class="secondary">Hold to talk</button>
+    <button id="reset" class="secondary">Reset</button>
+  </div>
+  <div class="card"><div class="say" id="say">—</div></div>
+  <div class="row">
+    <div class="card"><b>Interpretation</b><pre id="out"></pre></div>
+    <div class="card"><b>Car state (simulated)</b><pre id="state"></pre></div>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+async function show(r) {
+  const j = await r.json();
+  $("say").textContent = j.response_text || j.detail || "—";
+  const f = j.frame || j;  // V1 LLM frame or V2 flat result
+  $("out").textContent = JSON.stringify({transcript: j.transcript, asr: j.asr && {language: j.asr.language, status: j.asr.status},
+    intent: f.intent, parameters: f.parameters, speech_act: f.speech_act, negated: f.negated,
+    confidence: j.confidence, top_k: j.prediction && j.prediction.top_k, personal_match: j.personal_match,
+    decision: j.decision || (j.policy && j.policy.decision), reason: j.reason_code || (j.policy && j.policy.reason_code),
+    action: (j.action_result || j.action || {}).message, timings_s: j.timings_s}, null, 2);
+  refresh();
+}
+async function refresh() { const s = await (await fetch("/state")).json(); $("state").textContent = JSON.stringify(s, null, 2); }
+$("send").onclick = () => fetch("/text", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({text: $("t").value})}).then(show);
+$("t").onkeydown = e => { if (e.key === "Enter") $("send").click(); };
+$("reset").onclick = () => fetch("/reset", {method:"POST"}).then(refresh);
+let rec, chunks = [];
+$("rec").onpointerdown = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+  rec = new MediaRecorder(stream); chunks = [];
+  rec.ondataavailable = e => chunks.push(e.data);
+  rec.onstop = () => { stream.getTracks().forEach(t => t.stop());
+    const fd = new FormData(); fd.append("file", new Blob(chunks, {type: rec.mimeType}), "speech.webm");
+    $("say").textContent = "Processing…"; fetch("/audio", {method:"POST", body: fd}).then(show); };
+  rec.start(); $("rec").textContent = "Recording… release to send";
+};
+$("rec").onpointerup = () => { if (rec && rec.state === "recording") rec.stop(); $("rec").textContent = "Hold to talk"; };
+refresh();
+</script>
+</body>
+</html>

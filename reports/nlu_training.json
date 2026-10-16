@@ -1,0 +1,802 @@
+{
+  "minilm_torch": {
+    "key": "minilm_torch",
+    "classifier_comparison": [
+      {
+        "model": "logreg",
+        "C": 0.5,
+        "val_macro_f1": 0.5282
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.0625,
+        "val_macro_f1": 0.5466
+      },
+      {
+        "model": "logreg",
+        "C": 1,
+        "val_macro_f1": 0.5472
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.125,
+        "val_macro_f1": 0.5544
+      },
+      {
+        "model": "logreg",
+        "C": 2,
+        "val_macro_f1": 0.566
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.25,
+        "val_macro_f1": 0.5845
+      },
+      {
+        "model": "logreg",
+        "C": 4,
+        "val_macro_f1": 0.5836
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.5,
+        "val_macro_f1": 0.5959
+      },
+      {
+        "model": "logreg",
+        "C": 8,
+        "val_macro_f1": 0.5893
+      },
+      {
+        "model": "linear_svm",
+        "C": 1.0,
+        "val_macro_f1": 0.6147
+      },
+      {
+        "model": "logreg",
+        "C": 16,
+        "val_macro_f1": 0.5911
+      },
+      {
+        "model": "linear_svm",
+        "C": 2.0,
+        "val_macro_f1": 0.6331
+      },
+      {
+        "model": "logreg",
+        "C": 32,
+        "val_macro_f1": 0.5915
+      },
+      {
+        "model": "linear_svm",
+        "C": 4.0,
+        "val_macro_f1": 0.6292
+      }
+    ],
+    "best": {
+      "logreg": {
+        "C": 32,
+        "val_macro_f1": 0.5915
+      },
+      "linear_svm": {
+        "C": 2.0,
+        "val_macro_f1": 0.6331
+      }
+    },
+    "temperature": 1.1884,
+    "val_ece_raw": 0.0775,
+    "val_ece_calibrated": 0.0537,
+    "thresholds": {
+      "min_score": 0.925,
+      "min_margin": 0.0,
+      "val_wrong_execution_rate": 0.0,
+      "val_coverage_of_correct_exec": 0.2414,
+      "val_accepted": 35,
+      "target_risk": 0.02,
+      "met_target": true
+    },
+    "val_negation_acc": 0.9907,
+    "val_implicit_acc": 0.9833,
+    "artifacts": "artifacts\\nlu\\minilm_torch"
+  },
+  "minilm_onnx_int8": {
+    "key": "minilm_onnx_int8",
+    "classifier_comparison": [
+      {
+        "model": "logreg",
+        "C": 0.5,
+        "val_macro_f1": 0.5235
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.0625,
+        "val_macro_f1": 0.524
+      },
+      {
+        "model": "logreg",
+        "C": 1,
+        "val_macro_f1": 0.5461
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.125,
+        "val_macro_f1": 0.5512
+      },
+      {
+        "model": "logreg",
+        "C": 2,
+        "val_macro_f1": 0.5652
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.25,
+        "val_macro_f1": 0.5696
+      },
+      {
+        "model": "logreg",
+        "C": 4,
+        "val_macro_f1": 0.5861
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.5,
+        "val_macro_f1": 0.5873
+      },
+      {
+        "model": "logreg",
+        "C": 8,
+        "val_macro_f1": 0.6102
+      },
+      {
+        "model": "linear_svm",
+        "C": 1.0,
+        "val_macro_f1": 0.6063
+      },
+      {
+        "model": "logreg",
+        "C": 16,
+        "val_macro_f1": 0.6195
+      },
+      {
+        "model": "linear_svm",
+        "C": 2.0,
+        "val_macro_f1": 0.6258
+      },
+      {
+        "model": "logreg",
+        "C": 32,
+        "val_macro_f1": 0.6186
+      },
+      {
+        "model": "linear_svm",
+        "C": 4.0,
+        "val_macro_f1": 0.6279
+      }
+    ],
+    "best": {
+      "logreg": {
+        "C": 16,
+        "val_macro_f1": 0.6195
+      },
+      "linear_svm": {
+        "C": 4.0,
+        "val_macro_f1": 0.6279
+      }
+    },
+    "temperature": 1.0403,
+    "val_ece_raw": 0.0565,
+    "val_ece_calibrated": 0.0587,
+    "thresholds": {
+      "min_score": 0.9,
+      "min_margin": 0.0,
+      "val_wrong_execution_rate": 0.0,
+      "val_coverage_of_correct_exec": 0.3129,
+      "val_accepted": 46,
+      "target_risk": 0.02,
+      "met_target": true
+    },
+    "val_negation_acc": 0.9907,
+    "val_implicit_acc": 0.9833,
+    "artifacts": "artifacts\\nlu\\minilm_onnx_int8"
+  },
+  "e5_torch": {
+    "key": "e5_torch",
+    "classifier_comparison": [
+      {
+        "model": "logreg",
+        "C": 0.5,
+        "val_macro_f1": 0.5747
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.0625,
+        "val_macro_f1": 0.6242
+      },
+      {
+        "model": "logreg",
+        "C": 1,
+        "val_macro_f1": 0.6209
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.125,
+        "val_macro_f1": 0.6249
+      },
+      {
+        "model": "logreg",
+        "C": 2,
+        "val_macro_f1": 0.6411
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.25,
+        "val_macro_f1": 0.6495
+      },
+      {
+        "model": "logreg",
+        "C": 4,
+        "val_macro_f1": 0.6472
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.5,
+        "val_macro_f1": 0.6627
+      },
+      {
+        "model": "logreg",
+        "C": 8,
+        "val_macro_f1": 0.6653
+      },
+      {
+        "model": "linear_svm",
+        "C": 1.0,
+        "val_macro_f1": 0.6715
+      },
+      {
+        "model": "logreg",
+        "C": 16,
+        "val_macro_f1": 0.676
+      },
+      {
+        "model": "linear_svm",
+        "C": 2.0,
+        "val_macro_f1": 0.6722
+      },
+      {
+        "model": "logreg",
+        "C": 32,
+        "val_macro_f1": 0.6751
+      },
+      {
+        "model": "linear_svm",
+        "C": 4.0,
+        "val_macro_f1": 0.686
+      }
+    ],
+    "best": {
+      "logreg": {
+        "C": 16,
+        "val_macro_f1": 0.676
+      },
+      "linear_svm": {
+        "C": 4.0,
+        "val_macro_f1": 0.686
+      }
+    },
+    "temperature": 0.6273,
+    "val_ece_raw": 0.1649,
+    "val_ece_calibrated": 0.0509,
+    "thresholds": {
+      "min_score": 0.2,
+      "min_margin": 0.0,
+      "val_wrong_execution_rate": 0.3622,
+      "val_coverage_of_correct_exec": 1.0,
+      "val_accepted": 254,
+      "target_risk": 0.02,
+      "met_target": false
+    },
+    "val_negation_acc": 0.9938,
+    "val_implicit_acc": 0.9958,
+    "artifacts": "artifacts\\nlu\\e5_torch"
+  },
+  "e5_onnx_int8": {
+    "key": "e5_onnx_int8",
+    "classifier_comparison": [
+      {
+        "model": "logreg",
+        "C": 0.5,
+        "val_macro_f1": 0.5811
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.0625,
+        "val_macro_f1": 0.6209
+      },
+      {
+        "model": "logreg",
+        "C": 1,
+        "val_macro_f1": 0.6177
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.125,
+        "val_macro_f1": 0.6523
+      },
+      {
+        "model": "logreg",
+        "C": 2,
+        "val_macro_f1": 0.6194
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.25,
+        "val_macro_f1": 0.6494
+      },
+      {
+        "model": "logreg",
+        "C": 4,
+        "val_macro_f1": 0.6388
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.5,
+        "val_macro_f1": 0.6554
+      },
+      {
+        "model": "logreg",
+        "C": 8,
+        "val_macro_f1": 0.6651
+      },
+      {
+        "model": "linear_svm",
+        "C": 1.0,
+        "val_macro_f1": 0.6679
+      },
+      {
+        "model": "logreg",
+        "C": 16,
+        "val_macro_f1": 0.673
+      },
+      {
+        "model": "linear_svm",
+        "C": 2.0,
+        "val_macro_f1": 0.6807
+      },
+      {
+        "model": "logreg",
+        "C": 32,
+        "val_macro_f1": 0.6759
+      },
+      {
+        "model": "linear_svm",
+        "C": 4.0,
+        "val_macro_f1": 0.6974
+      }
+    ],
+    "best": {
+      "logreg": {
+        "C": 32,
+        "val_macro_f1": 0.6759
+      },
+      "linear_svm": {
+        "C": 4.0,
+        "val_macro_f1": 0.6974
+      }
+    },
+    "temperature": 0.7359,
+    "val_ece_raw": 0.1182,
+    "val_ece_calibrated": 0.0664,
+    "thresholds": {
+      "min_score": 0.2,
+      "min_margin": 0.0,
+      "val_wrong_execution_rate": 0.3506,
+      "val_coverage_of_correct_exec": 1.0,
+      "val_accepted": 251,
+      "target_risk": 0.02,
+      "met_target": false
+    },
+    "val_negation_acc": 0.9938,
+    "val_implicit_acc": 0.9875,
+    "artifacts": "artifacts\\nlu\\e5_onnx_int8"
+  },
+  "minilm-ft_onnx_fp32": {
+    "key": "minilm-ft_onnx_fp32",
+    "classifier_comparison": [
+      {
+        "model": "logreg",
+        "C": 0.5,
+        "val_macro_f1": 0.7092
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.0625,
+        "val_macro_f1": 0.7077
+      },
+      {
+        "model": "logreg",
+        "C": 1,
+        "val_macro_f1": 0.7078
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.125,
+        "val_macro_f1": 0.7127
+      },
+      {
+        "model": "logreg",
+        "C": 2,
+        "val_macro_f1": 0.7164
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.25,
+        "val_macro_f1": 0.7133
+      },
+      {
+        "model": "logreg",
+        "C": 4,
+        "val_macro_f1": 0.7142
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.5,
+        "val_macro_f1": 0.7234
+      },
+      {
+        "model": "logreg",
+        "C": 8,
+        "val_macro_f1": 0.7146
+      },
+      {
+        "model": "linear_svm",
+        "C": 1.0,
+        "val_macro_f1": 0.7232
+      },
+      {
+        "model": "logreg",
+        "C": 16,
+        "val_macro_f1": 0.7141
+      },
+      {
+        "model": "linear_svm",
+        "C": 2.0,
+        "val_macro_f1": 0.7187
+      },
+      {
+        "model": "logreg",
+        "C": 32,
+        "val_macro_f1": 0.7184
+      },
+      {
+        "model": "linear_svm",
+        "C": 4.0,
+        "val_macro_f1": 0.7135
+      }
+    ],
+    "best": {
+      "logreg": {
+        "C": 32,
+        "val_macro_f1": 0.7184
+      },
+      "linear_svm": {
+        "C": 0.5,
+        "val_macro_f1": 0.7234
+      }
+    },
+    "temperature": 1.4705,
+    "val_ece_raw": 0.1414,
+    "val_ece_calibrated": 0.0729,
+    "thresholds": {
+      "min_score": 0.95,
+      "min_margin": 0.0,
+      "val_wrong_execution_rate": 0.0,
+      "val_coverage_of_correct_exec": 0.0971,
+      "val_accepted": 17,
+      "target_risk": 0.02,
+      "met_target": true
+    },
+    "val_negation_acc": 0.972,
+    "val_implicit_acc": 0.9583,
+    "artifacts": "artifacts\\nlu\\minilm-ft_onnx_fp32"
+  },
+  "minilm-ft_onnx_int8": {
+    "key": "minilm-ft_onnx_int8",
+    "classifier_comparison": [
+      {
+        "model": "logreg",
+        "C": 0.5,
+        "val_macro_f1": 0.684
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.0625,
+        "val_macro_f1": 0.6823
+      },
+      {
+        "model": "logreg",
+        "C": 1,
+        "val_macro_f1": 0.6843
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.125,
+        "val_macro_f1": 0.6848
+      },
+      {
+        "model": "logreg",
+        "C": 2,
+        "val_macro_f1": 0.6843
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.25,
+        "val_macro_f1": 0.7021
+      },
+      {
+        "model": "logreg",
+        "C": 4,
+        "val_macro_f1": 0.6856
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.5,
+        "val_macro_f1": 0.7128
+      },
+      {
+        "model": "logreg",
+        "C": 8,
+        "val_macro_f1": 0.6907
+      },
+      {
+        "model": "linear_svm",
+        "C": 1.0,
+        "val_macro_f1": 0.7113
+      },
+      {
+        "model": "logreg",
+        "C": 16,
+        "val_macro_f1": 0.6958
+      },
+      {
+        "model": "linear_svm",
+        "C": 2.0,
+        "val_macro_f1": 0.7088
+      },
+      {
+        "model": "logreg",
+        "C": 32,
+        "val_macro_f1": 0.6868
+      },
+      {
+        "model": "linear_svm",
+        "C": 4.0,
+        "val_macro_f1": 0.7148
+      }
+    ],
+    "best": {
+      "logreg": {
+        "C": 16,
+        "val_macro_f1": 0.6958
+      },
+      "linear_svm": {
+        "C": 4.0,
+        "val_macro_f1": 0.7148
+      }
+    },
+    "temperature": 1.3576,
+    "val_ece_raw": 0.1134,
+    "val_ece_calibrated": 0.0752,
+    "thresholds": {
+      "min_score": 0.2,
+      "min_margin": 0.0,
+      "val_wrong_execution_rate": 0.2822,
+      "val_coverage_of_correct_exec": 1.0,
+      "val_accepted": 241,
+      "target_risk": 0.02,
+      "met_target": false
+    },
+    "val_negation_acc": 0.947,
+    "val_implicit_acc": 0.9292,
+    "artifacts": "artifacts\\nlu\\minilm-ft_onnx_int8"
+  },
+  "e5-ft_onnx_fp32": {
+    "key": "e5-ft_onnx_fp32",
+    "classifier_comparison": [
+      {
+        "model": "logreg",
+        "C": 0.5,
+        "val_macro_f1": 0.7335
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.0625,
+        "val_macro_f1": 0.7487
+      },
+      {
+        "model": "logreg",
+        "C": 1,
+        "val_macro_f1": 0.7335
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.125,
+        "val_macro_f1": 0.7514
+      },
+      {
+        "model": "logreg",
+        "C": 2,
+        "val_macro_f1": 0.7354
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.25,
+        "val_macro_f1": 0.7639
+      },
+      {
+        "model": "logreg",
+        "C": 4,
+        "val_macro_f1": 0.7392
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.5,
+        "val_macro_f1": 0.7637
+      },
+      {
+        "model": "logreg",
+        "C": 8,
+        "val_macro_f1": 0.7372
+      },
+      {
+        "model": "linear_svm",
+        "C": 1.0,
+        "val_macro_f1": 0.7726
+      },
+      {
+        "model": "logreg",
+        "C": 16,
+        "val_macro_f1": 0.7344
+      },
+      {
+        "model": "linear_svm",
+        "C": 2.0,
+        "val_macro_f1": 0.7726
+      },
+      {
+        "model": "logreg",
+        "C": 32,
+        "val_macro_f1": 0.7398
+      },
+      {
+        "model": "linear_svm",
+        "C": 4.0,
+        "val_macro_f1": 0.781
+      }
+    ],
+    "best": {
+      "logreg": {
+        "C": 32,
+        "val_macro_f1": 0.7398
+      },
+      "linear_svm": {
+        "C": 4.0,
+        "val_macro_f1": 0.781
+      }
+    },
+    "temperature": 1.5102,
+    "val_ece_raw": 0.1377,
+    "val_ece_calibrated": 0.0526,
+    "thresholds": {
+      "min_score": 0.2,
+      "min_margin": 0.0,
+      "val_wrong_execution_rate": 0.2925,
+      "val_coverage_of_correct_exec": 1.0,
+      "val_accepted": 253,
+      "target_risk": 0.02,
+      "met_target": false
+    },
+    "val_negation_acc": 0.9315,
+    "val_implicit_acc": 0.925,
+    "artifacts": "artifacts\\nlu\\e5-ft_onnx_fp32"
+  },
+  "e5-ft_onnx_int8": {
+    "key": "e5-ft_onnx_int8",
+    "classifier_comparison": [
+      {
+        "model": "logreg",
+        "C": 0.5,
+        "val_macro_f1": 0.7673
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.0625,
+        "val_macro_f1": 0.7506
+      },
+      {
+        "model": "logreg",
+        "C": 1,
+        "val_macro_f1": 0.7711
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.125,
+        "val_macro_f1": 0.7506
+      },
+      {
+        "model": "logreg",
+        "C": 2,
+        "val_macro_f1": 0.7655
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.25,
+        "val_macro_f1": 0.7553
+      },
+      {
+        "model": "logreg",
+        "C": 4,
+        "val_macro_f1": 0.7629
+      },
+      {
+        "model": "linear_svm",
+        "C": 0.5,
+        "val_macro_f1": 0.7571
+      },
+      {
+        "model": "logreg",
+        "C": 8,
+        "val_macro_f1": 0.7627
+      },
+      {
+        "model": "linear_svm",
+        "C": 1.0,
+        "val_macro_f1": 0.7688
+      },
+      {
+        "model": "logreg",
+        "C": 16,
+        "val_macro_f1": 0.7643
+      },
+      {
+        "model": "linear_svm",
+        "C": 2.0,
+        "val_macro_f1": 0.7744
+      },
+      {
+        "model": "logreg",
+        "C": 32,
+        "val_macro_f1": 0.765
+      },
+      {
+        "model": "linear_svm",
+        "C": 4.0,
+        "val_macro_f1": 0.7776
+      }
+    ],
+    "best": {
+      "logreg": {
+        "C": 1,
+        "val_macro_f1": 0.7711
+      },
+      "linear_svm": {
+        "C": 4.0,
+        "val_macro_f1": 0.7776
+      }
+    },
+    "temperature": 0.8186,
+    "val_ece_raw": 0.1175,
+    "val_ece_calibrated": 0.0952,
+    "thresholds": {
+      "min_score": 0.2,
+      "min_margin": 0.0,
+      "val_wrong_execution_rate": 0.2767,
+      "val_coverage_of_correct_exec": 1.0,
+      "val_accepted": 253,
+      "target_risk": 0.02,
+      "met_target": false
+    },
+    "val_negation_acc": 0.9439,
+    "val_implicit_acc": 0.9167,
+    "artifacts": "artifacts\\nlu\\e5-ft_onnx_int8"
+  }
+}
