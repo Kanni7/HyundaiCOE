@@ -208,7 +208,7 @@ def snap_to_automotive_domain(text: str) -> str:
         matched = False
         for canonical, variants in DOMAIN_ANCHORS.items():
             for v in variants:
-                if fuzz.ratio(clean, v) >= 80:
+                if fuzz.ratio(clean, v) >= 90:
                     prefix = w[:len(w) - len(w.lstrip(".,!?;:\"'()[]{}"))]
                     suffix = w[len(w.rstrip(".,!?;:\"'()[]{}")):]
                     target = canonical

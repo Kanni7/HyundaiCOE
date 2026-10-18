@@ -177,6 +177,7 @@ class ActionResult(BaseModel):
 
 class ASRResult(BaseModel):
     text: str
+    raw_text: str | None = None  # model output before transliteration/normalisation
     language: str | None = None
     language_probability: float | None = None
     raw_detected_language: str | None = None  # before restricting to allowed languages

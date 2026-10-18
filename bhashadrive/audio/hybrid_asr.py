@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 import numpy as np
 
-from ..config import AppConfig, ASRConfig, DEFAULT_INCAR_PROMPT
+from ..config import AppConfig
 from ..schemas import ASRResult
 from .asr import SpeechRecognizer, FasterWhisperASR
 from .preprocessing import TARGET_SR, decode_file
@@ -29,23 +29,14 @@ class HybridASR(SpeechRecognizer):
         self._update_name()
 
     def _init_local_asr(self):
-        # 1. Try FasterWhisperASR with small model, beam search (5), and multilingual in-car prompt
-        c = ASRConfig(
-            model_size=self.config.asr.model_size or "small",
-            device=self.config.asr.device or "cpu",
-            compute_type="int8",
-            beam_size=5,
-            language=None,
-            allowed_languages=("en", "hi"),
-            local_files_only=False,
-            initial_prompt=DEFAULT_INCAR_PROMPT,
-        )
+        # 1. FasterWhisperASR configured from the environment (BD_ASR_*)
+        c = self.config.asr
         try:
             self._local_asr = FasterWhisperASR(c)
             self.local_engine_name = f"faster-whisper:{c.model_size}:{c.device}:{c.compute_type}"
             return
         except Exception as e:
-            pass
+            print(f"[NOTE] faster-whisper unavailable, trying sherpa-onnx: {e}")
 
         # 2. Fallback to SherpaWhisperASR if installed
         try:
@@ -100,16 +91,22 @@ class HybridASR(SpeechRecognizer):
                 model = "whisper-large-v3"
 
             files = {"file": ("audio.wav", buf, "audio/wav")}
-            data = {"model": model, "language": "en", "prompt": DEFAULT_INCAR_PROMPT}
+            data = {"model": model}
+            if self.config.asr.language:
+                data["language"] = self.config.asr.language
+            if self.config.asr.initial_prompt:
+                data["prompt"] = self.config.asr.initial_prompt
 
             with httpx.Client(timeout=4.0) as client:
                 resp = client.post(url, headers=headers, files=files, data=data)
                 if resp.status_code == 200:
-                    text = to_english(resp.json().get("text", "").strip())
+                    raw_text = resp.json().get("text", "").strip()
+                    text = to_english(raw_text)
                     latency = round(time.perf_counter() - t0, 3)
                     return ASRResult(
                         text=text,
-                        language="en",
+                        raw_text=raw_text,
+                        language=self.config.asr.language,
                         latency_s=latency,
                         status="ok" if text else "silence",
                         raw_detected_language="cloud",

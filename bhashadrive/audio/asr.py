@@ -105,17 +105,21 @@ class FasterWhisperASR(SpeechRecognizer):
             "thank you", "thank you.", "thanks for watching", "thanks for watching.",
             "thank you for watching", "subtitles by", "please subscribe", "bye.", "bye"
         }
+        min_logprob = getattr(self.config, "min_avg_logprob", -1.0)
         for s in segs:
             stext = s.text.strip()
             if stext.lower() in _HALLUCINATIONS or s.no_speech_prob > 0.85:
                 continue
+            if s.avg_logprob < min_logprob or (s.no_speech_prob > 0.6 and s.avg_logprob < -0.8):
+                continue  # low-confidence decode: noise or prompt regurgitation, not speech
             valid_segs.append(s)
-        text = " ".join(s.text.strip() for s in valid_segs).strip()
-        from ..nlu.normalizer import to_english, normalize_speech_transcript
-        text = to_english(text)
-        text = normalize_speech_transcript(text)
+        raw_text = " ".join(s.text.strip() for s in valid_segs).strip()
+        from ..nlu.normalizer import to_english
+        # Snapping/phonetic normalisation runs once, in the pipeline, so raw_text stays inspectable.
+        text = to_english(raw_text)
         return ASRResult(
             text=text,
+            raw_text=raw_text,
             language=info.language,
             language_probability=round(float(info.language_probability), 3),
             duration_s=round(duration, 2),
@@ -149,7 +153,10 @@ class FasterWhisperASR(SpeechRecognizer):
             initial_prompt=self.config.initial_prompt,
             condition_on_previous_text=False,
             no_speech_threshold=no_speech_th,
-            temperature=[0.0, 0.2, 0.4],
+            temperature=0.0,  # no sampling fallback: sampling on weak audio invents words from the prompt
+            log_prob_threshold=-1.0,
+            compression_ratio_threshold=2.4,
+            without_timestamps=True,
             **vad_kwargs,
         )
         return list(segments), info

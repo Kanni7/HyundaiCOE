@@ -96,7 +96,8 @@ def create_app(config: AppConfig | None = None, pipeline=None, legacy: bool = Fa
                     result.transcript = to_english(result.transcript)
                 if getattr(result, "normalized_transcript", None):
                     result.normalized_transcript = to_english(result.normalized_transcript)
-                raw_text = getattr(getattr(result, "asr", None), "text", "")
+                asr_res = getattr(result, "asr", None)
+                raw_text = (getattr(asr_res, "raw_text", None) or getattr(asr_res, "text", "")) if asr_res else ""
                 print(f"[API /audio] {len(data)} bytes ({file.filename}) -> raw='{raw_text}' -> english='{result.transcript}' -> intent='{getattr(result, 'intent', None)}' decision='{getattr(result, 'decision', None)}'")
             if config.store_audio:
                 config.audio_store_dir.mkdir(parents=True, exist_ok=True)

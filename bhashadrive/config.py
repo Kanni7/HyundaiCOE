@@ -34,17 +34,8 @@ def _env_bool(name: str, default: bool) -> bool:
     return os.environ.get(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
 
 
-DEFAULT_INCAR_PROMPT = (
-    "In-car voice assistant. Commands in Hindi, Hinglish, and English: "
-    "temperature, cabin, climate, set temperature to 22 degrees, make it warmer, make it cooler, "
-    "AC on, AC off, AC chalu karo, AC band kar do, cabin thoda thanda kar do, cabin thoda warm kar do, "
-    "fan speed, blower speed, fan speed badha do, fan speed kam karo, blower tez karo, hawa dheemi karo, "
-    "volume up, volume down, volume badha do, volume kam karo, awaaz badhao, awaaz dheemi karo, mute, "
-    "play music, pause music, next song, previous song, gaana chalao, gaana roko, agla gaana, pichhla gaana, "
-    "thand lag rahi hai, garmi lag rahi hai, bahut thand hai, bahut garmi hai, sardi lag rahi hai, "
-    "navigate to Connaught Place, India Gate, airport, hospital, Delhi le chalo, rasta dikhao, route set karo, "
-    "yes, haan kar do, no, nahi mat karo, cancel."
-)
+# Keep this short: on weak audio Whisper regurgitates prompt text as if it were spoken.
+DEFAULT_INCAR_PROMPT = "In-car voice commands: AC, temperature, fan speed, volume, music, navigation."
 
 
 @dataclass
@@ -54,19 +45,22 @@ class ASRConfig:
     compute_type: str = field(default_factory=lambda: _env("BD_ASR_COMPUTE_TYPE", "int8"))
     beam_size: int = field(default_factory=lambda: _env_int("BD_ASR_BEAM_SIZE", 5))  # 5 = beam search for high accuracy
     cpu_threads: int = field(default_factory=lambda: _env_int("BD_ASR_THREADS", 4))
-    language: str | None = field(default_factory=lambda: _env("BD_ASR_LANGUAGE", "") or None)  # None = auto-detect among allowed_languages
+    # "en" keeps Hinglish in Latin script; empty = auto-detect among allowed_languages (Hindi comes out in Devanagari).
+    language: str | None = field(default_factory=lambda: _env("BD_ASR_LANGUAGE", "en") or None)
     # Auto-detection is restricted to these languages; empty = any language Whisper knows.
     allowed_languages: tuple = field(default_factory=lambda: tuple(
         x.strip() for x in _env("BD_ASR_ALLOWED_LANGUAGES", "en,hi").split(",") if x.strip()))
     vad_filter: bool = field(default_factory=lambda: _env_bool("BD_ASR_VAD", True))
-    vad_parameters: dict = field(default_factory=lambda: {"min_silence_duration_ms": 600, "threshold": 0.35, "speech_pad_ms": 400})
+    vad_parameters: dict = field(default_factory=lambda: {"min_silence_duration_ms": 600, "threshold": 0.5, "speech_pad_ms": 400})
     no_speech_threshold: float = field(default_factory=lambda: _env_float("BD_ASR_NO_SPEECH_TH", 0.6))
-    initial_prompt: str | None = field(default_factory=lambda: os.environ.get("BD_ASR_INITIAL_PROMPT", DEFAULT_INCAR_PROMPT))
+    initial_prompt: str | None = field(default_factory=lambda: os.environ.get("BD_ASR_INITIAL_PROMPT", DEFAULT_INCAR_PROMPT) or None)
     download_root: str | None = field(default_factory=lambda: os.environ.get("BD_ASR_MODEL_DIR") or None)
     # After the one-time download, keep this true so startup never touches the network.
     local_files_only: bool = field(default_factory=lambda: _env_bool("BD_ASR_LOCAL_ONLY", True))
     sample_rate: int = 16000
-    min_rms: float = field(default_factory=lambda: _env_float("BD_ASR_MIN_RMS", 0.003))
+    min_rms: float = field(default_factory=lambda: _env_float("BD_ASR_MIN_RMS", 0.01))
+    # Segments decoded with lower average log-probability are dropped as guesses.
+    min_avg_logprob: float = field(default_factory=lambda: _env_float("BD_ASR_MIN_LOGPROB", -1.0))
 
 
 @dataclass
@@ -121,7 +115,7 @@ class SherpaASRConfig:
     threads: int = field(default_factory=lambda: _env_int("BD_ASR_THREADS", 4))
     timeout_s: float = field(default_factory=lambda: _env_float("BD_ASR_TIMEOUT_S", 10.0))
     max_audio_s: float = field(default_factory=lambda: _env_float("BD_MAX_AUDIO_S", 15.0))
-    min_rms: float = field(default_factory=lambda: _env_float("BD_ASR_MIN_RMS", 0.003))
+    min_rms: float = field(default_factory=lambda: _env_float("BD_ASR_MIN_RMS", 0.01))
 
 
 @dataclass
