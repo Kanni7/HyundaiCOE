@@ -35,22 +35,24 @@ def _env_bool(name: str, default: bool) -> bool:
 
 
 DEFAULT_INCAR_PROMPT = (
-    "Bhai, cabin thoda thanda kar do, cabin thoda warm kar do, cabin cooling badhao, "
-    "AC thoda thanda karo, AC warm karo, AC on karo, AC band kar do, AC chala do, "
-    "temperature 22 degree pe set karo, fan speed badha do, fan speed kam karo, blower tez karo, hawa dheemi karo, "
-    "volume badha do, volume kam karo, awaaz badhao, awaaz dheemi karo, mute karo, "
-    "gaana chalao, gaana roko, music pause karo, next song, previous song, "
-    "thand lag rahi hai, garmi lag rahi hai, bahut thand hai, bahut garmi hai, "
-    "navigate to Connaught Place, Delhi le chalo, rasta dikhao."
+    "In-car voice assistant. Commands in Hindi, Hinglish, and English: "
+    "temperature, cabin, climate, set temperature to 22 degrees, make it warmer, make it cooler, "
+    "AC on, AC off, AC chalu karo, AC band kar do, cabin thoda thanda kar do, cabin thoda warm kar do, "
+    "fan speed, blower speed, fan speed badha do, fan speed kam karo, blower tez karo, hawa dheemi karo, "
+    "volume up, volume down, volume badha do, volume kam karo, awaaz badhao, awaaz dheemi karo, mute, "
+    "play music, pause music, next song, previous song, gaana chalao, gaana roko, agla gaana, pichhla gaana, "
+    "thand lag rahi hai, garmi lag rahi hai, bahut thand hai, bahut garmi hai, sardi lag rahi hai, "
+    "navigate to Connaught Place, India Gate, airport, hospital, Delhi le chalo, rasta dikhao, route set karo, "
+    "yes, haan kar do, no, nahi mat karo, cancel."
 )
 
 
 @dataclass
 class ASRConfig:
-    model_size: str = field(default_factory=lambda: _env("BD_ASR_MODEL", "base"))
+    model_size: str = field(default_factory=lambda: _env("BD_ASR_MODEL", "small"))
     device: str = field(default_factory=lambda: _env("BD_ASR_DEVICE", "cpu"))  # cpu | cuda | auto
     compute_type: str = field(default_factory=lambda: _env("BD_ASR_COMPUTE_TYPE", "int8"))
-    beam_size: int = field(default_factory=lambda: _env_int("BD_ASR_BEAM_SIZE", 1))  # 1 = greedy decode for low latency
+    beam_size: int = field(default_factory=lambda: _env_int("BD_ASR_BEAM_SIZE", 5))  # 5 = beam search for high accuracy
     cpu_threads: int = field(default_factory=lambda: _env_int("BD_ASR_THREADS", 4))
     language: str | None = field(default_factory=lambda: _env("BD_ASR_LANGUAGE", "") or None)  # None = auto-detect among allowed_languages
     # Auto-detection is restricted to these languages; empty = any language Whisper knows.

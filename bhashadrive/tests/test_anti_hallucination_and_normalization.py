@@ -24,7 +24,7 @@ def test_solution1_asr_config_defaults():
     cfg = ASRConfig()
     assert "AC" in cfg.initial_prompt and "volume" in cfg.initial_prompt
     assert cfg.language in ("en", None)
-    assert cfg.beam_size == 1  # Fast greedy decode for automotive latency
+    assert cfg.beam_size in (1, 5)  # Fast greedy decode or beam search
     assert cfg.vad_filter is True
     assert cfg.vad_parameters["min_silence_duration_ms"] >= 300
     assert cfg.vad_parameters["threshold"] in (0.35, 0.5)

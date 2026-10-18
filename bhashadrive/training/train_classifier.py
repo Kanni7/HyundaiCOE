@@ -111,7 +111,7 @@ def calibrate_thresholds(probs: np.ndarray, y: np.ndarray, classes: list[str]) -
             if best is None or cand > best[0]:
                 best = (cand, float(ts), float(tm), float(risk), float(cov), int(n))
     _, ts, tm, risk, cov, n = best
-    ts = max(0.60, ts)
+    ts = min(max(0.60, ts), 0.75)
     tm = max(0.15, tm)
     return {"min_score": round(ts, 4), "min_margin": round(tm, 4), "val_wrong_execution_rate": round(risk, 4),
             "val_coverage_of_correct_exec": round(cov, 4), "val_accepted": n, "target_risk": TARGET_RISK,
@@ -151,7 +151,7 @@ def train(encoder: str, backend: str, out_dir: Path | None = None, C_grid=(0.5, 
 
     # Negation head (binary) and implicit-request head (executable intents only).
     neg_tr = np.array([r["negated"] for r in tr], int)
-    neg = LogisticRegression(C=4, max_iter=3000, class_weight="balanced").fit(Xtr, neg_tr)
+    neg = LogisticRegression(C=4, max_iter=3000).fit(Xtr, neg_tr)
     ex_tr = [i for i, r in enumerate(tr) if r["intent"] in EXEC and not r["negated"]]
     imp_y = np.array([tr[i]["speech_act"] == "implicit_request" for i in ex_tr], int)
     imp = LogisticRegression(C=4, max_iter=3000, class_weight="balanced").fit(Xtr[ex_tr], imp_y)
