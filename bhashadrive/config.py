@@ -34,18 +34,32 @@ def _env_bool(name: str, default: bool) -> bool:
     return os.environ.get(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
 
 
+DEFAULT_INCAR_PROMPT = (
+    "Bhai, cabin thoda thanda kar do, cabin thoda warm kar do, cabin cooling badhao, "
+    "AC thoda thanda karo, AC warm karo, AC on karo, AC band kar do, AC chala do, "
+    "temperature 22 degree pe set karo, fan speed badha do, fan speed kam karo, blower tez karo, hawa dheemi karo, "
+    "volume badha do, volume kam karo, awaaz badhao, awaaz dheemi karo, mute karo, "
+    "gaana chalao, gaana roko, music pause karo, next song, previous song, "
+    "thand lag rahi hai, garmi lag rahi hai, bahut thand hai, bahut garmi hai, "
+    "navigate to Connaught Place, Delhi le chalo, rasta dikhao."
+)
+
+
 @dataclass
 class ASRConfig:
-    model_size: str = field(default_factory=lambda: _env("BD_ASR_MODEL", "small"))
+    model_size: str = field(default_factory=lambda: _env("BD_ASR_MODEL", "base"))
     device: str = field(default_factory=lambda: _env("BD_ASR_DEVICE", "cpu"))  # cpu | cuda | auto
     compute_type: str = field(default_factory=lambda: _env("BD_ASR_COMPUTE_TYPE", "int8"))
-    beam_size: int = field(default_factory=lambda: _env_int("BD_ASR_BEAM_SIZE", 5))
-    language: str | None = field(default_factory=lambda: os.environ.get("BD_ASR_LANGUAGE") or None)  # None = auto
+    beam_size: int = field(default_factory=lambda: _env_int("BD_ASR_BEAM_SIZE", 1))  # 1 = greedy decode for low latency
+    cpu_threads: int = field(default_factory=lambda: _env_int("BD_ASR_THREADS", 4))
+    language: str | None = field(default_factory=lambda: _env("BD_ASR_LANGUAGE", "") or None)  # None = auto-detect among allowed_languages
     # Auto-detection is restricted to these languages; empty = any language Whisper knows.
     allowed_languages: tuple = field(default_factory=lambda: tuple(
         x.strip() for x in _env("BD_ASR_ALLOWED_LANGUAGES", "en,hi").split(",") if x.strip()))
     vad_filter: bool = field(default_factory=lambda: _env_bool("BD_ASR_VAD", True))
-    initial_prompt: str | None = field(default_factory=lambda: os.environ.get("BD_ASR_INITIAL_PROMPT") or None)
+    vad_parameters: dict = field(default_factory=lambda: {"min_silence_duration_ms": 600, "threshold": 0.35, "speech_pad_ms": 400})
+    no_speech_threshold: float = field(default_factory=lambda: _env_float("BD_ASR_NO_SPEECH_TH", 0.6))
+    initial_prompt: str | None = field(default_factory=lambda: os.environ.get("BD_ASR_INITIAL_PROMPT", DEFAULT_INCAR_PROMPT))
     download_root: str | None = field(default_factory=lambda: os.environ.get("BD_ASR_MODEL_DIR") or None)
     # After the one-time download, keep this true so startup never touches the network.
     local_files_only: bool = field(default_factory=lambda: _env_bool("BD_ASR_LOCAL_ONLY", True))

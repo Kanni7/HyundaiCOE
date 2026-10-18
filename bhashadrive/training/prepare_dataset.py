@@ -160,6 +160,11 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
 
 
 def main(argv=None) -> int:
+    import sys
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
     ap = argparse.ArgumentParser()
     ap.add_argument("--seed", type=int, default=13)
     ap.add_argument("--variants", type=int, default=6)

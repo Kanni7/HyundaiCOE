@@ -67,6 +67,7 @@ class FasterWhisperASR(SpeechRecognizer):
                 compute_type=c.compute_type,
                 download_root=c.download_root,
                 local_files_only=c.local_files_only,
+                cpu_threads=getattr(c, "cpu_threads", 4),
             )
         except Exception as exc:
             hint = f"Run `python scripts/download_models.py --asr {c.model_size}` once with internet access."
@@ -99,7 +100,19 @@ class FasterWhisperASR(SpeechRecognizer):
         except Exception as exc:
             return ASRResult(text="", status="error", error=f"Whisper inference failed: {exc}")
         latency = time.perf_counter() - t0
-        text = " ".join(s.text.strip() for s in segs).strip()
+        valid_segs = []
+        _HALLUCINATIONS = {
+            "thank you", "thank you.", "thanks for watching", "thanks for watching.",
+            "thank you for watching", "subtitles by", "please subscribe", "bye.", "bye"
+        }
+        for s in segs:
+            stext = s.text.strip()
+            if stext.lower() in _HALLUCINATIONS or s.no_speech_prob > 0.85:
+                continue
+            valid_segs.append(s)
+        text = " ".join(s.text.strip() for s in valid_segs).strip()
+        from ..nlu.normalizer import to_english
+        text = to_english(text)
         return ASRResult(
             text=text,
             language=info.language,
@@ -119,14 +132,21 @@ class FasterWhisperASR(SpeechRecognizer):
 
 
     def _decode(self, audio: np.ndarray, language: str | None):
+        vad_kwargs = {}
+        if self.config.vad_filter and getattr(self.config, "vad_parameters", None):
+            vad_kwargs["vad_parameters"] = self.config.vad_parameters
+        no_speech_th = getattr(self.config, "no_speech_threshold", 0.6)
+        lang = language or getattr(self.config, "language", "en")
         segments, info = self.model.transcribe(
             audio,
-            language=language,
-            task="transcribe",  # transcribe, never translate
-            beam_size=self.config.beam_size,
+            language=lang,
+            task="transcribe",  # transcribe in english/hinglish
+            beam_size=getattr(self.config, "beam_size", 1),
             vad_filter=self.config.vad_filter,
             initial_prompt=self.config.initial_prompt,
             condition_on_previous_text=False,
+            no_speech_threshold=no_speech_th,
+            **vad_kwargs,
         )
         return list(segments), info
 

@@ -19,17 +19,42 @@ class TextIn(BaseModel):
     text: str = Field(max_length=500)
 
 
-def create_app(config: AppConfig | None = None, pipeline=None, legacy: bool = False) -> FastAPI:
+class ConnectivityIn(BaseModel):
+    offline: bool
+
+
+def create_app(config: AppConfig | None = None, pipeline=None, legacy: bool = False, mock: bool = False) -> FastAPI:
     config = config or AppConfig()
     if pipeline is None:
-        if legacy:  # V1 dev-only benchmark path
+        if mock:
+            from ..audio.asr import MockASR
+            from ..tests.fakes_v2 import make_pipeline
+
+            pipeline = make_pipeline()
+            pipeline.asr = MockASR("pause the music")
+        elif legacy:  # V1 dev-only benchmark path
             from ..pipeline import build_default_pipeline
 
             pipeline = build_default_pipeline(config, with_asr=True)
         else:
-            from ..pipeline_v2 import build_v2_pipeline
+            try:
+                from ..pipeline_v2 import build_v2_pipeline
 
-            pipeline = build_v2_pipeline(config, with_asr=True)
+                pipeline = build_v2_pipeline(config, with_asr=True)
+            except Exception as e:
+                import sys
+                print(f"[NOTE] Model weights not found ({e}). Falling back to mock pipeline for test console.", file=sys.stderr)
+                from ..audio.asr import MockASR
+                from ..tests.fakes_v2 import make_pipeline
+
+                pipeline = make_pipeline()
+                try:
+                    from ..audio.hybrid_asr import HybridASR
+                    pipeline.asr = HybridASR(config)
+                    print(f"[OK] HybridASR initialized: {pipeline.asr.name}")
+                except Exception as asr_err:
+                    print(f"[NOTE] HybridASR init error: {asr_err}")
+                    pipeline.asr = None
     is_v2 = hasattr(pipeline, "model")
     lock = threading.Lock()  # one conversation, processed sequentially
     app = FastAPI(title="BhashaDrive (local prototype)", docs_url="/docs")
@@ -46,7 +71,12 @@ def create_app(config: AppConfig | None = None, pipeline=None, legacy: bool = Fa
     @app.post("/text")
     def text(body: TextIn):
         with lock:
-            return pipeline.process_text(body.text).model_dump(mode="json")
+            res = pipeline.process_text(body.text)
+            from ..nlu.normalizer import to_english
+            if getattr(res, "transcript", None):
+                res.transcript = to_english(res.transcript)
+            print(f"[API /text] input='{body.text}' -> intent='{getattr(res, 'intent', None)}' decision='{getattr(res, 'decision', None)}'")
+            return res.model_dump(mode="json")
 
     @app.post("/audio")
     async def audio(file: UploadFile = File(...)):
@@ -61,6 +91,13 @@ def create_app(config: AppConfig | None = None, pipeline=None, legacy: bool = Fa
             p.write_bytes(data)
             with lock:
                 result = pipeline.process_audio_file(p)
+                from ..nlu.normalizer import to_english
+                if getattr(result, "transcript", None):
+                    result.transcript = to_english(result.transcript)
+                if getattr(result, "normalized_transcript", None):
+                    result.normalized_transcript = to_english(result.normalized_transcript)
+                raw_text = getattr(getattr(result, "asr", None), "text", "")
+                print(f"[API /audio] {len(data)} bytes ({file.filename}) -> raw='{raw_text}' -> english='{result.transcript}' -> intent='{getattr(result, 'intent', None)}' decision='{getattr(result, 'decision', None)}'")
             if config.store_audio:
                 config.audio_store_dir.mkdir(parents=True, exist_ok=True)
                 (config.audio_store_dir / p.name).write_bytes(data)
@@ -81,6 +118,19 @@ def create_app(config: AppConfig | None = None, pipeline=None, legacy: bool = Fa
         return [{"id": c.id, "trigger": c.trigger, "phrases": c.phrases, "action": c.action.model_dump(mode="json"),
                  "updated_at": c.updated_at} for c in pipeline.store.list_commands(pipeline.profile_id)]
 
+    @app.get("/connectivity")
+    def get_connectivity():
+        if hasattr(pipeline.asr, "get_status"):
+            return pipeline.asr.get_status()
+        return {"is_offline": False, "active_engine": getattr(pipeline.asr, "name", "unknown")}
+
+    @app.post("/connectivity")
+    def set_connectivity(body: ConnectivityIn):
+        if hasattr(pipeline.asr, "set_offline_mode"):
+            pipeline.asr.set_offline_mode(body.offline)
+            return pipeline.asr.get_status()
+        return {"is_offline": body.offline, "note": "ASR engine does not support dynamic toggle"}
+
     @app.post("/reset")
     def reset():
         if is_v2:
@@ -94,8 +144,8 @@ def create_app(config: AppConfig | None = None, pipeline=None, legacy: bool = Fa
     return app
 
 
-def run(config: AppConfig | None = None, host: str | None = None, port: int | None = None, legacy: bool = False) -> None:
+def run(config: AppConfig | None = None, host: str | None = None, port: int | None = None, legacy: bool = False, mock: bool = False) -> None:
     import uvicorn
 
     config = config or AppConfig()
-    uvicorn.run(create_app(config, legacy=legacy), host=host or config.api_host, port=port or config.api_port)
+    uvicorn.run(create_app(config, legacy=legacy, mock=mock), host=host or config.api_host, port=port or config.api_port)

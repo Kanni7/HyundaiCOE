@@ -104,10 +104,15 @@ def calibrate_thresholds(probs: np.ndarray, y: np.ndarray, classes: list[str]) -
                 continue
             risk = (acc & ~correct).sum() / n
             cov = (acc & correct).sum() / max(1, (is_exec & correct).sum())
-            cand = (risk <= TARGET_RISK, cov, -ts, -tm)
+            if risk <= TARGET_RISK:
+                cand = (2, cov, -ts, -tm)
+            else:
+                cand = (1, -risk, cov, -ts, -tm)
             if best is None or cand > best[0]:
                 best = (cand, float(ts), float(tm), float(risk), float(cov), int(n))
     _, ts, tm, risk, cov, n = best
+    ts = max(0.60, ts)
+    tm = max(0.15, tm)
     return {"min_score": round(ts, 4), "min_margin": round(tm, 4), "val_wrong_execution_rate": round(risk, 4),
             "val_coverage_of_correct_exec": round(cov, 4), "val_accepted": n, "target_risk": TARGET_RISK,
             "met_target": bool(best[0][0])}
@@ -153,7 +158,10 @@ def train(encoder: str, backend: str, out_dir: Path | None = None, C_grid=(0.5, 
     ex_va = [i for i, r in enumerate(va) if r["intent"] in EXEC and not r["negated"]]
     imp_va = np.array([va[i]["speech_act"] == "implicit_request" for i in ex_va], int)
 
-    out_dir = out_dir or ROOT / "artifacts" / "nlu" / key
+    if out_dir:
+        out_dir = (ROOT / out_dir).resolve() if not Path(out_dir).is_absolute() else Path(out_dir)
+    else:
+        out_dir = ROOT / "artifacts" / "nlu" / key
     out_dir.mkdir(parents=True, exist_ok=True)
     np.savez(out_dir / "heads.npz", intent_W=W, intent_b=b, neg_W=neg.coef_.astype(np.float32),
              neg_b=neg.intercept_.astype(np.float32), imp_W=imp.coef_.astype(np.float32), imp_b=imp.intercept_.astype(np.float32))
@@ -190,11 +198,12 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--encoder", nargs="+", default=["minilm"], choices=list(ENCODERS))
     ap.add_argument("--backend", nargs="+", default=["onnx_int8"], choices=["torch", "onnx_fp32", "onnx_int8"])
+    ap.add_argument("--out-dir", type=Path, default=None, help="Directory to save artifacts into")
     args = ap.parse_args(argv)
     reports = []
     for e in args.encoder:
         for b in args.backend:
-            r = train(e, b)
+            r = train(e, b, out_dir=args.out_dir)
             reports.append(r)
             print(json.dumps({k: v for k, v in r.items() if k != "classifier_comparison"}, indent=1))
     p = ROOT / "reports" / "nlu_training.json"

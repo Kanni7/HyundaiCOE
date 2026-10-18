@@ -26,6 +26,7 @@ SEEDS: dict[str, list[str]] = {
         "en:~The heat is unbearable", "hi:तापमान कम {कर दो|कीजिए}", "hi:गाड़ी {ठंडी|ठंडा} कर दो",
         "hi:~बहुत गर्मी लग रही है", "hi:~अंदर बहुत उमस है", "rh:Temperature kam {karo|kar do}",
         "rh:Gaadi thandi kar do", "rh:~Bahut garmi ho rahi hai", "rh:~Pasina aa raha hai",
+        "rh:~{Mujhe |}garmi lag rahi hai", "hg:~Garmi lag rahi hai yaar", "hg:~Bahut garmi lag rahi hai",
         "hg:AC ko thoda {cool|thanda} karo", "hg:Temperature {low|down} kar do", "hg:Cooling {badha|tez kar} do",
         "hg:~Bahut hot lag raha hai yaar", "hg:~Garmi se {haalat kharab|pareshaan} hai", "hg:Cabin ko {chilled|thoda cool} kar do",
     ],
@@ -160,10 +161,14 @@ SEEDS: dict[str, list[str]] = {
         "en:Change it", "en:Make it better", "en:Turn it up a bit", "en:Increase it", "en:Lower it",
         "en:Adjust the settings", "en:Fix this", "en:Something is off", "en:Can you do something about it",
         "en:Switch it", "en:Do the usual",
+        "en:Temperature", "en:Cabin temperature", "en:Climate", "en:AC", "en:Fan", "en:Blower", "en:Volume", "en:Music",
         "hi:इसे बदलो", "hi:थोड़ा कम करो", "hi:थोड़ा बढ़ाओ", "hi:कुछ करो",
+        "hi:तापमान", "hi:तापमान बदलो", "hi:एसी", "hi:पंखा", "hi:वॉल्यूम", "hi:गाना",
         "rh:Isko badlo", "rh:Thoda kam karo", "rh:Thoda badhao", "rh:Kuch karo yaar",
+        "rh:Temperature", "rh:Taapmaan", "rh:Cabin temperature", "rh:AC", "rh:Pankha", "rh:Awaaz", "rh:Gaana",
         "hg:Isko adjust karo", "hg:Thoda up kar do", "hg:Settings change karo", "hg:Ye theek karo",
-        "hg:Kuch to gadbad hai",
+        "hg:Kuch to gadbad hai", "hg:Temperature dekh lo", "hg:AC ka kuch karo", "hg:Fan dekhna", "hg:Volume dekhna",
+        "hg:Music dekhna",
     ],
 }
 
@@ -232,8 +237,28 @@ EXTRA_SEEDS: dict[str, list[str]] = {
         "en:Fan slower please", "en:Less fan", "hi:पंखे की स्पीड कम करो", "rh:Pankhe ki speed ghatao",
         "hg:Fan ki speed thodi neeche karo", "hg:~Hawa bahut zyada aa rahi hai",
     ],
+    "climate_temperature_set": [
+        "hg:Temp {T} pe kar do", "hg:Temperature {T} degree kar do", "hg:Cabin {T} degree set karo", "hg:AC {T} pe lagao",
+    ],
+    "climate_on": [
+        "hg:AC chalu karo na", "hg:AC on kar do bhai", "hg:AC start karo jaldi",
+    ],
+    "climate_off": [
+        "hg:AC band karo na", "hg:AC off kar do bhai", "hg:AC bandh karo jaldi",
+    ],
+    "media_next": [
+        "hg:Agla song play karo", "hg:Track change karo na", "hg:Next gaana lagao bhai",
+    ],
+    "media_previous": [
+        "hg:Pichhla gaana lagao", "hg:Pehle wala song chalao", "hg:Previous track bajao bhai",
+    ],
+    "navigation_destination_request": [
+        "hg:{D} chalo jaldi", "hg:{D} le chalo bhai", "hg:{D} ka navigation lagao na",
+    ],
     "dialog_confirm": ["en:Yes, go for it", "hg:Haan, karo", "rh:Theek hai", "hi:हाँ, ठीक है"],
-    "unsupported": ["rh:Khidki band karo", "hg:Window open karo", "en:Close the sunroof", "hg:Mirror adjust karo"],
+    "dialog_cancel": ["en:No, cancel it", "hg:Nahi mat karo", "rh:Rehne do bhai", "hg:Cancel kar do"],
+    "unsupported": ["rh:Khidki band karo", "hg:Window open karo", "en:Close the sunroof", "hg:Mirror adjust karo", "hg:Horn bajao na"],
 }
 for _k, _v in EXTRA_SEEDS.items():
     SEEDS[_k] = SEEDS[_k] + _v
+

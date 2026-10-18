@@ -17,11 +17,12 @@ from .schemas import ASRResult, Decision, PipelineResult, PolicyResult
 from .vehicle.base import VehicleAdapter, dispatch
 
 
+from .nlu.normalizer import normalize_speech_transcript
+
+
 def normalize_transcript(text: str) -> str:
-    """Unicode NFC + whitespace cleanup only. Never translates, never drops words (e.g. negation)."""
-    text = unicodedata.normalize("NFC", text or "")
-    text = "".join(ch for ch in text if unicodedata.category(ch) != "Cc" or ch in "\n\t")
-    return " ".join(text.split())
+    """Unicode NFC, phonetic slip normalization, anti-hallucination. Never drops words (e.g. negation)."""
+    return normalize_speech_transcript(text)
 
 
 _REJECT_TEXT = {

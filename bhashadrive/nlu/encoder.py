@@ -82,23 +82,37 @@ class OnnxSentenceEncoder(SentenceEncoder):
 
 
 class TorchSentenceEncoder(SentenceEncoder):
-    """Reference encoder (development / training only)."""
+    """Reference encoder using transformers (no sentence-transformers package required)."""
 
     def __init__(self, model_dir: str | Path, device: str = "cpu"):
-        from sentence_transformers import SentenceTransformer
+        from transformers import AutoModel, AutoTokenizer
 
         model_dir = Path(model_dir)
-        self.model = SentenceTransformer(str(model_dir), device=device, local_files_only=True)
+        self.device = device
+        self.tokenizer = AutoTokenizer.from_pretrained(str(model_dir), local_files_only=True)
+        self.model = AutoModel.from_pretrained(str(model_dir), local_files_only=True).to(device)
+        self.model.eval()
         self.prefix = _prefix_for(model_dir)
         self.name = f"torch:{model_dir.name}"
-        self.dim = self.model.get_sentence_embedding_dimension()
+        self.dim = getattr(self.model.config, "hidden_size", 384)
 
     def encode(self, texts: list[str]) -> np.ndarray:
         if not texts:
             return np.zeros((0, self.dim), np.float32)
-        x = self.model.encode([self.prefix + t for t in texts], batch_size=64, convert_to_numpy=True,
-                              normalize_embeddings=False, show_progress_bar=False)
-        return _normalise(np.asarray(x, np.float32))
+        import torch
+
+        all_pooled = []
+        batch_size = 64
+        with torch.no_grad():
+            for i in range(0, len(texts), batch_size):
+                batch = [self.prefix + t for t in texts[i:i + batch_size]]
+                inputs = self.tokenizer(batch, padding=True, truncation=True, max_length=64, return_tensors="pt").to(self.device)
+                out = self.model(**inputs)
+                mask = inputs["attention_mask"].unsqueeze(-1)
+                pooled = (out.last_hidden_state * mask).sum(dim=1) / torch.clamp(mask.sum(dim=1), min=1e-9)
+                all_pooled.append(pooled.cpu().numpy())
+        res = np.vstack(all_pooled) if all_pooled else np.zeros((0, self.dim), np.float32)
+        return _normalise(res)
 
 
 def load_encoder_manifest(artifacts_dir: str | Path) -> dict:

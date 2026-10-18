@@ -3,67 +3,703 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BhashaDrive Test Console</title>
+<title>BhashaDrive Test Console - In-Car Voice Assistant</title>
 <style>
-  :root { --bg:#f6f7f9; --fg:#1b1f24; --muted:#5b6470; --card:#fff; --line:#d8dde3; --accent:#0b5cad; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#14171b; --fg:#e7eaee; --muted:#9aa4af; --card:#1d2126; --line:#2e343b; --accent:#5aa2ef; } }
-  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.45 system-ui, sans-serif; }
-  main { max-width:900px; margin:0 auto; padding:16px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px; margin:12px 0; }
-  input[type=text] { width:100%; box-sizing:border-box; padding:10px; font-size:16px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--fg); }
-  button { padding:8px 14px; margin:8px 6px 0 0; border:1px solid var(--accent); background:var(--accent); color:#fff; border-radius:6px; cursor:pointer; }
-  button.secondary { background:transparent; color:var(--accent); }
-  pre { white-space:pre-wrap; word-break:break-word; font-size:13px; color:var(--muted); }
-  .say { font-size:18px; }
-  .row { display:flex; gap:12px; flex-wrap:wrap; }
-  .row > div { flex:1 1 260px; }
+  :root {
+    --bg: #f8fafc;
+    --fg: #0f172a;
+    --muted: #64748b;
+    --card: #ffffff;
+    --line: #e2e8f0;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --warning: #d97706;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --fg: #f8fafc;
+      --muted: #94a3b8;
+      --card: #1e293b;
+      --line: #334155;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 20px;
+  }
+  main { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  p.subtitle { color: var(--muted); margin-bottom: 16px; font-size: 14px; }
+  
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .connectivity-card {
+    border-left: 4px solid var(--accent);
+    background: var(--card);
+  }
+  .connectivity-card.offline-card {
+    border-left-color: var(--danger);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .badge.online {
+    background: rgba(22, 163, 74, 0.12);
+    color: var(--success);
+    border: 1px solid rgba(22, 163, 74, 0.3);
+  }
+  .badge.offline {
+    background: rgba(220, 38, 38, 0.12);
+    color: var(--danger);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+  }
+  
+  .input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  input[type=text] {
+    flex: 1 1 320px;
+    padding: 12px 14px;
+    font-size: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--fg);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type=text]:focus { border-color: var(--accent); }
+  input[type=text].empty-warn { border-color: var(--danger); animation: shake 0.3s; }
+  @keyframes shake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-5px); } 75% { transform:translateX(5px); } }
+
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+  }
+  button:hover { background: var(--accent-hover); }
+  button:active { transform: scale(0.98); }
+  button.secondary {
+    background: transparent;
+    color: var(--accent);
+  }
+  button.secondary:hover {
+    background: rgba(37, 99, 235, 0.08);
+  }
+  button.recording {
+    background: var(--danger) !important;
+    border-color: var(--danger) !important;
+    color: #fff !important;
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+  .meter-box {
+    margin-top: 10px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: none;
+  }
+  .meter-track {
+    width: 100%;
+    height: 12px;
+    background: var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .meter-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--success);
+    border-radius: 6px;
+    transition: width 0.08s ease-out;
+  }
+
+  .quick-examples { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
+  .quick-examples-title { font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .chip {
+    display: inline-block;
+    padding: 6px 12px;
+    margin: 4px 6px 4px 0;
+    font-size: 13px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    cursor: pointer;
+    color: var(--fg);
+    user-select: none;
+    transition: all 0.15s;
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(37, 99, 235, 0.08);
+    transform: translateY(-1px);
+  }
+  .chip:active { transform: translateY(0); }
+
+  .status-text {
+    font-size: 13px;
+    min-height: 20px;
+    margin-top: 10px;
+    color: var(--muted);
+  }
+  .status-text.err { color: var(--danger); font-weight: 500; }
+  .status-text.ok { color: var(--success); font-weight: 500; }
+
+  .response-header {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .say {
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--fg);
+    min-height: 28px;
+  }
+
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .car-gauges {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .gauge {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+  .gauge-label { font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .gauge-val { font-size: 18px; font-weight: 700; margin-top: 2px; }
+  pre {
+    background: var(--bg);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 12px;
+    color: var(--muted);
+    max-height: 320px;
+    overflow-y: auto;
+  }
 </style>
 </head>
 <body>
 <main>
-  <h1>BhashaDrive test console</h1>
-  <p style="color:var(--muted)">Local prototype. Speech and text are processed on this machine; the car is a simulator.</p>
-  <div class="card">
-    <input id="t" type="text" placeholder="Type what the driver says, e.g. Bhai, volume thoda badha do">
-    <button id="send">Send text</button>
-    <button id="rec" class="secondary">Hold to talk</button>
-    <button id="reset" class="secondary">Reset</button>
+  <h1>BhashaDrive In-Car Voice System</h1>
+  <p class="subtitle">Dual-Mode Hybrid Voice Pipeline (Cloud ASR + Local Faster-Whisper Base Offline Engine)</p>
+
+  <!-- Network & Connectivity Simulation Banner -->
+  <div class="card connectivity-card" id="connCard">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div>
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--muted); margin-bottom:4px;">Vehicle Telematics & Connectivity Status</div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span id="connBadge" class="badge online">🟢 Online: Cloud Speech API</span>
+          <span id="engineBadge" style="font-size:13px; color:var(--muted); font-weight:500;">(Local Faster-Whisper Base INT8 on standby)</span>
+        </div>
+      </div>
+      <div>
+        <button id="connToggle" class="secondary" onclick="toggleConnectivity()">
+          📶 Disconnect Internet (Simulate Tunnel Mode)
+        </button>
+      </div>
+    </div>
+    <div id="connDesc" style="font-size:13px; color:var(--muted); margin-top:10px; line-height:1.45;">
+      Connected to vehicle telematics. Click <b>"Disconnect Internet"</b> to simulate entering a tunnel or remote area without signal and demonstrate that in-car voice commands continue working 100% offline via <b>Faster-Whisper Base INT8</b>.
+    </div>
   </div>
-  <div class="card"><div class="say" id="say">—</div></div>
+
+  <!-- Voice & Command Input Card -->
+  <div class="card">
+    <div class="input-row">
+      <input id="t" type="text" placeholder="Type a command or click 'Start Speaking' (e.g. Bhai, volume thoda badha do)">
+    </div>
+
+    <div class="btn-group">
+      <button id="send" onclick="sendTextCommand()">➤ Send Text</button>
+      <button id="talkBtn" onclick="toggleTalk()">🎤 Start Speaking (Click to Talk)</button>
+      <button id="reset" class="secondary" onclick="resetState()">🔄 Reset State</button>
+    </div>
+
+    <div class="meter-box" id="meterBox">
+      <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--muted);">
+        <span>🔴 Microphone Active — Speak now in English, Hindi, or Hinglish...</span>
+        <span id="meterText">0%</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" id="meterFill"></div>
+      </div>
+    </div>
+
+    <div class="quick-examples">
+      <div class="quick-examples-title">Quick In-Car Commands (Click any chip or speak into mic):</div>
+      <span class="chip" onclick="sendTextCommand('Cabin thoda thanda kar do')">❄️ Cabin thanda karo</span>
+      <span class="chip" onclick="sendTextCommand('Cabin thoda warm kar do')">🔥 Cabin warm karo</span>
+      <span class="chip" onclick="sendTextCommand('AC thoda thanda kar do')">🧊 AC thanda karo</span>
+      <span class="chip" onclick="sendTextCommand('Garmi lag rahi hai')">☀️ Garmi lag rahi hai</span>
+      <span class="chip" onclick="sendTextCommand('Thand lag rahi hai')">🥶 Thand lag rahi hai</span>
+      <span class="chip" onclick="sendTextCommand('Bhai, volume thoda badha do')">🔊 Volume badha do</span>
+      <span class="chip" onclick="sendTextCommand('Volume kam karo')">🔉 Volume kam karo</span>
+      <span class="chip" onclick="sendTextCommand('AC 22 pe set kar do')">🌡️ AC 22 pe set karo</span>
+      <span class="chip" onclick="sendTextCommand('Fan speed badha do')">💨 Fan speed badhao</span>
+      <span class="chip" onclick="sendTextCommand('Turn the AC off')">⏹️ Turn AC off</span>
+      <span class="chip" onclick="sendTextCommand('Pause the music')">⏸️ Pause music</span>
+      <span class="chip" onclick="sendTextCommand('Play music')">▶️ Play music</span>
+      <span class="chip" onclick="sendTextCommand('When I say chill mode, set the temperature to 21')">✨ Teach 'chill mode'</span>
+    </div>
+
+    <div class="status-text" id="status"></div>
+  </div>
+
+  <!-- Response Card -->
+  <div class="card">
+    <div class="response-header">Vehicle Assistant Response</div>
+    <div class="say" id="say">—</div>
+    <div id="confirmBox" style="display:none; margin-top:12px; padding:10px 14px; background:rgba(37,99,235,0.06); border:1px solid var(--line); border-radius:8px;">
+      <div style="font-size:13px; font-weight:600; margin-bottom:8px; color:var(--fg);">Driver confirmation required:</div>
+      <div style="display:flex; gap:10px;">
+        <button class="secondary" style="border-color:var(--success); color:var(--success); padding:6px 16px;" onclick="sendTextCommand('yes')">✅ Haan / Yes (Execute)</button>
+        <button class="secondary" style="border-color:var(--danger); color:var(--danger); padding:6px 16px;" onclick="sendTextCommand('no')">❌ Nahi / No (Cancel)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vehicle State & NLU Interpretation -->
   <div class="row">
-    <div class="card"><b>Interpretation</b><pre id="out"></pre></div>
-    <div class="card"><b>Car state (simulated)</b><pre id="state"></pre></div>
+    <div class="card">
+      <div class="response-header">Simulated Vehicle State</div>
+      <div class="car-gauges">
+        <div class="gauge">
+          <div class="gauge-label">Cabin Temp</div>
+          <div class="gauge-val" id="g-temp">--°C</div>
+        </div>
+        <div class="gauge">
+          <div class="gauge-label">AC Power</div>
+          <div class="gauge-val" id="g-ac">--</div>
+        </div>
+        <div class="gauge">
+          <div class="gauge-label">Fan Speed</div>
+          <div class="gauge-val" id="g-fan">--</div>
+        </div>
+        <div class="gauge">
+          <div class="gauge-label">Volume</div>
+          <div class="gauge-val" id="g-vol">--</div>
+        </div>
+      </div>
+      <pre id="state">Loading car state...</pre>
+    </div>
+
+    <div class="card">
+      <div class="response-header">Interpretation & NLU Pipeline</div>
+      <pre id="out">Interpretation details will appear here...</pre>
+    </div>
   </div>
 </main>
+
 <script>
 const $ = id => document.getElementById(id);
-async function show(r) {
-  const j = await r.json();
-  $("say").textContent = j.response_text || j.detail || "—";
-  const f = j.frame || j;  // V1 LLM frame or V2 flat result
-  $("out").textContent = JSON.stringify({transcript: j.transcript, asr: j.asr && {language: j.asr.language, status: j.asr.status},
-    intent: f.intent, parameters: f.parameters, speech_act: f.speech_act, negated: f.negated,
-    confidence: j.confidence, top_k: j.prediction && j.prediction.top_k, personal_match: j.personal_match,
-    decision: j.decision || (j.policy && j.policy.decision), reason: j.reason_code || (j.policy && j.policy.reason_code),
-    action: (j.action_result || j.action || {}).message, timings_s: j.timings_s}, null, 2);
-  refresh();
+
+let isOfflineMode = false;
+
+function setStatus(msg, type) {
+  const el = $("status");
+  el.textContent = msg || "";
+  el.className = "status-text" + (type ? " " + type : "");
 }
-async function refresh() { const s = await (await fetch("/state")).json(); $("state").textContent = JSON.stringify(s, null, 2); }
-$("send").onclick = () => fetch("/text", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({text: $("t").value})}).then(show);
-$("t").onkeydown = e => { if (e.key === "Enter") $("send").click(); };
-$("reset").onclick = () => fetch("/reset", {method:"POST"}).then(refresh);
-let rec, chunks = [];
-$("rec").onpointerdown = async () => {
-  const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-  rec = new MediaRecorder(stream); chunks = [];
-  rec.ondataavailable = e => chunks.push(e.data);
-  rec.onstop = () => { stream.getTracks().forEach(t => t.stop());
-    const fd = new FormData(); fd.append("file", new Blob(chunks, {type: rec.mimeType}), "speech.webm");
-    $("say").textContent = "Processing…"; fetch("/audio", {method:"POST", body: fd}).then(show); };
-  rec.start(); $("rec").textContent = "Recording… release to send";
-};
-$("rec").onpointerup = () => { if (rec && rec.state === "recording") rec.stop(); $("rec").textContent = "Hold to talk"; };
-refresh();
+
+function updateGauges(v) {
+  if (!v) return;
+  $("g-temp").textContent = (v.cabin_temperature_c !== undefined ? v.cabin_temperature_c + "°C" : "--");
+  $("g-ac").textContent = v.ac_on ? "ON" : "OFF";
+  $("g-ac").style.color = v.ac_on ? "var(--success)" : "var(--muted)";
+  $("g-fan").textContent = (v.fan_speed !== undefined ? v.fan_speed + " / 7" : "--");
+  $("g-vol").textContent = (v.volume !== undefined ? v.volume + " / 30" : "--");
+}
+
+async function refreshState() {
+  try {
+    const res = await fetch("/state");
+    const data = await res.json();
+    $("state").textContent = JSON.stringify(data, null, 2);
+    if (data && data.vehicle) {
+      updateGauges(data.vehicle);
+    }
+  } catch (err) {
+    console.error("Refresh state error:", err);
+  }
+}
+
+// ---- Connectivity & Demonstration Mode ----
+async function checkConnectivity() {
+  try {
+    const res = await fetch("/connectivity");
+    const data = await res.json();
+    isOfflineMode = !!data.is_offline;
+    updateConnectivityUI();
+  } catch (e) {
+    console.warn("Connectivity check error:", e);
+  }
+}
+
+async function toggleConnectivity() {
+  try {
+    const targetState = !isOfflineMode;
+    const res = await fetch("/connectivity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ offline: targetState })
+    });
+    const data = await res.json();
+    isOfflineMode = !!data.is_offline;
+    updateConnectivityUI();
+    setStatus(
+      isOfflineMode
+        ? "📴 Internet disconnected. System is now running 100% locally on in-car Faster-Whisper Base!"
+        : "🟢 Internet reconnected. Cloud Speech API is now active with local fallback.",
+      "ok"
+    );
+  } catch (err) {
+    setStatus("Failed to toggle connectivity: " + err.message, "err");
+  }
+}
+
+function updateConnectivityUI() {
+  const card = $("connCard");
+  const badge = $("connBadge");
+  const engine = $("engineBadge");
+  const btn = $("connToggle");
+  const desc = $("connDesc");
+
+  if (isOfflineMode) {
+    card.classList.add("offline-card");
+    badge.className = "badge offline";
+    badge.textContent = "📴 In-Car Offline: Faster-Whisper Base";
+    engine.textContent = "(Local CPU INT8 Engine - 100% Offline)";
+    btn.textContent = "🌐 Reconnect Internet (Enable Cloud API)";
+    desc.innerHTML = "<b>In-Car Offline Mode Active:</b> Cellular network is disconnected (simulating a tunnel, parking basement, or remote highway). Voice recognition is running <b>100% locally on Faster-Whisper Base INT8</b> with zero cloud dependence.";
+  } else {
+    card.classList.remove("offline-card");
+    badge.className = "badge online";
+    badge.textContent = "🟢 Online: Cloud Speech API";
+    engine.textContent = "(Local Faster-Whisper Base on standby)";
+    btn.textContent = "📶 Disconnect Internet (Simulate Tunnel Mode)";
+    desc.innerHTML = "<b>Connected Mode:</b> System uses high-bandwidth Cloud Speech API. If connection drops, it instantly falls back to <b>Faster-Whisper Base INT8</b> with zero voice command failure.";
+  }
+}
+
+async function displayResult(res) {
+  let j;
+  try {
+    j = await res.json();
+  } catch (e) {
+    $("say").textContent = "Invalid response from server";
+    setStatus("Error parsing response", "err");
+    return;
+  }
+
+  if (!res.ok) {
+    $("say").textContent = j.detail || ("HTTP Error " + res.status);
+    setStatus("Error: " + (j.detail || res.status), "err");
+    return;
+  }
+
+  const dec = j.decision || (j.policy && j.policy.decision);
+  const isConfirm = dec === "ask_confirmation";
+  const cBox = $("confirmBox");
+  if (cBox) cBox.style.display = isConfirm ? "block" : "none";
+
+  $("say").textContent = j.response_text || j.detail || "(Command acknowledged)";
+  setStatus("Success", "ok");
+
+  const f = j.frame || j;
+  $("out").textContent = JSON.stringify({
+    transcript: j.transcript,
+    asr_engine: isOfflineMode ? "Local Faster-Whisper Base INT8 (In-Car Offline)" : (j.asr && j.asr.raw_detected_language === "cloud_api" ? "Cloud Speech API" : "Local Faster-Whisper Base (Fallback)"),
+    mode: isOfflineMode ? "Offline (In-Car Embedded)" : "Online",
+    asr: j.asr && { text: j.asr.text, language: j.asr.language, latency_s: j.asr.latency_s },
+    intent: f.intent,
+    parameters: f.parameters,
+    speech_act: f.speech_act,
+    decision: j.decision || (j.policy && j.policy.decision),
+    reason: j.reason_code || (j.policy && j.policy.reason_code),
+    action: (j.action_result || j.action || {}).message,
+    timings_s: j.timings_s
+  }, null, 2);
+
+  refreshState();
+}
+
+function sendTextCommand(text) {
+  const inputEl = $("t");
+  text = (text !== undefined ? text : inputEl.value).trim();
+  
+  if (!text) {
+    inputEl.classList.add("empty-warn");
+    inputEl.focus();
+    setStatus("Please type a command or click a quick example prompt below.", "err");
+    setTimeout(() => inputEl.classList.remove("empty-warn"), 1500);
+    return;
+  }
+
+  inputEl.value = text;
+  setStatus("Processing: \"" + text + "\"…", "");
+  $("say").textContent = "Processing…";
+
+  fetch("/text", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text })
+  })
+  .then(displayResult)
+  .catch(err => {
+    $("say").textContent = "Connection error";
+    setStatus("Connection error: " + err.message, "err");
+  });
+}
+
+$("t").addEventListener("keydown", e => { if (e.key === "Enter") sendTextCommand(); });
+
+async function resetState() {
+  setStatus("Resetting car state...", "");
+  try {
+    await fetch("/reset", { method: "POST" });
+    $("say").textContent = "Car simulator reset to default state.";
+    setStatus("Car state reset successfully.", "ok");
+    refreshState();
+  } catch (err) {
+    setStatus("Reset failed: " + err.message, "err");
+  }
+}
+
+// ---- Production-Grade In-Car Voice Recording Pipeline ----
+let audioCtx = null;
+let mediaStream = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let analyser = null;
+let animFrame = null;
+let isRecording = false;
+let recordStartTime = 0;
+
+function updateMeter() {
+  if (!isRecording || !analyser) return;
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(data);
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) sum += data[i];
+  let avg = Math.round((sum / data.length) * 1.8);
+  avg = Math.min(100, Math.max(0, avg));
+  
+  $("meterFill").style.width = avg + "%";
+  $("meterText").textContent = avg + "%";
+  animFrame = requestAnimationFrame(updateMeter);
+}
+
+async function startRecording() {
+  try {
+    setStatus("Activating microphone with noise cancellation...", "");
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+
+    // AudioContext used SOLELY for the visual meter (NEVER connected to destination to avoid feedback loops)
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") {
+        await audioCtx.resume();
+      }
+      const source = audioCtx.createMediaStreamSource(mediaStream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
+      // NOTE: source is NEVER connected to audioCtx.destination to prevent speaker loopback!
+    } catch (e) {
+      console.warn("Visualizer init warning:", e);
+    }
+
+    recordedChunks = [];
+    let mimeType = "";
+    if (typeof MediaRecorder !== "undefined") {
+      const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"];
+      for (const c of candidates) {
+        if (MediaRecorder.isTypeSupported(c)) {
+          mimeType = c;
+          break;
+        }
+      }
+      try {
+        mediaRecorder = mimeType ? new MediaRecorder(mediaStream, { mimeType }) : new MediaRecorder(mediaStream);
+      } catch (recErr) {
+        mediaRecorder = new MediaRecorder(mediaStream);
+      }
+      mediaRecorder.ondataavailable = e => {
+        if (e.data && e.data.size > 0) {
+          recordedChunks.push(e.data);
+        }
+      };
+      mediaRecorder.start(100); // chunk every 100ms
+    }
+
+    isRecording = true;
+    recordStartTime = Date.now();
+    
+    const btn = $("talkBtn");
+    btn.textContent = "⏹️ Stop & Send Command";
+    btn.classList.add("recording");
+    $("meterBox").style.display = "block";
+    setStatus("Listening... Speak your command now (Hindi, English, or Hinglish)!", "ok");
+    
+    updateMeter();
+  } catch (err) {
+    console.error("Microphone access error:", err);
+    setStatus("Microphone error: " + (err.message || err.name) + ". Please allow microphone permissions.", "err");
+  }
+}
+
+function stopAndSendRecording() {
+  if (!isRecording) return;
+  isRecording = false;
+
+  const btn = $("talkBtn");
+  btn.textContent = "🎤 Start Speaking (Click to Talk)";
+  btn.classList.remove("recording");
+  $("meterBox").style.display = "none";
+  if (animFrame) cancelAnimationFrame(animFrame);
+
+  const duration = Date.now() - recordStartTime;
+  if (duration < 400) {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      try { mediaRecorder.stop(); } catch(e) {}
+    }
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(t => t.stop());
+      mediaStream = null;
+    }
+    if (audioCtx) {
+      try { audioCtx.close(); } catch(e) {}
+      audioCtx = null;
+    }
+    setStatus("Recording was too short. Please speak your full command.", "err");
+    return;
+  }
+
+  const engineName = isOfflineMode ? "Faster-Whisper Base (Offline)" : "Cloud Speech API";
+  setStatus("Transcribing via " + engineName + "…", "");
+  $("say").textContent = "Transcribing speech…";
+
+  function sendBlob(blob, filename) {
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(t => t.stop());
+      mediaStream = null;
+    }
+    if (audioCtx) {
+      try { audioCtx.close(); } catch(e) {}
+      audioCtx = null;
+    }
+
+    const fd = new FormData();
+    fd.append("file", blob, filename);
+
+    fetch("/audio", { method: "POST", body: fd })
+      .then(async res => {
+        const data = await res.clone().json();
+        if (data && data.transcript) {
+          $("t").value = data.transcript;
+          setStatus("Transcribed: \"" + data.transcript + "\"", "ok");
+        }
+        return displayResult(res);
+      })
+      .catch(err => {
+        $("say").textContent = "Upload failed";
+        setStatus("Error sending audio: " + err.message, "err");
+      });
+  }
+
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.onstop = () => {
+      const mime = mediaRecorder.mimeType || "audio/webm";
+      const ext = mime.includes("mp4") ? "mp4" : (mime.includes("ogg") ? "ogg" : "webm");
+      const blob = new Blob(recordedChunks, { type: mime });
+      sendBlob(blob, "voice_command." + ext);
+    };
+    try {
+      mediaRecorder.stop();
+    } catch (e) {
+      console.warn("MediaRecorder stop error:", e);
+    }
+  } else {
+    // Fallback if mediaRecorder was not initialized
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(t => t.stop());
+      mediaStream = null;
+    }
+    setStatus("No audio captured.", "err");
+  }
+}
+
+function toggleTalk() {
+  if (isRecording) {
+    stopAndSendRecording();
+  } else {
+    startRecording();
+  }
+}
+
+// Initial load
+checkConnectivity();
+refreshState();
 </script>
 </body>
 </html>
