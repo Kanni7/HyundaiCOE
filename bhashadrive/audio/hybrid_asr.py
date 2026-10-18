@@ -29,19 +29,20 @@ class HybridASR(SpeechRecognizer):
         self._update_name()
 
     def _init_local_asr(self):
-        # 1. Try FasterWhisperASR with base model, fast greedy decode, and english transcript
+        # 1. Try FasterWhisperASR with small model, beam search (5), and multilingual in-car prompt
         c = ASRConfig(
-            model_size="base",
-            device="cpu",
+            model_size=self.config.asr.model_size or "small",
+            device=self.config.asr.device or "cpu",
             compute_type="int8",
-            beam_size=1,
+            beam_size=5,
             language=None,
+            allowed_languages=("en", "hi"),
             local_files_only=False,
             initial_prompt=DEFAULT_INCAR_PROMPT,
         )
         try:
             self._local_asr = FasterWhisperASR(c)
-            self.local_engine_name = "faster-whisper:base:cpu:int8"
+            self.local_engine_name = f"faster-whisper:{c.model_size}:{c.device}:{c.compute_type}"
             return
         except Exception as e:
             pass

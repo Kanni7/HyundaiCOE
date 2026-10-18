@@ -127,6 +127,24 @@ class BhashaDrivePipelineV2:
         if getattr(self, "rescorer", None) is not None:
             norm, _ = self.rescorer.rescore(norm)
         pred, emb = self.model.predict(norm)
+        _SINGLE_DOMAIN_WORDS = {
+            "temperature", "cabin", "climate", "taapmaan",
+            "fan", "blower", "pankha", "airflow",
+            "volume", "sound", "awaaz", "aawaz", "audio",
+            "music", "song", "gaana", "gana",
+            "ac", "aircon", "air conditioning",
+        }
+        if norm.strip().lower() in _SINGLE_DOMAIN_WORDS:
+            from .schemas_v2 import IntentPrediction
+            pred = IntentPrediction(
+                intent=IntentV2.AMBIGUOUS,
+                score=0.99,
+                margin=0.99,
+                top_k=[(IntentV2.AMBIGUOUS.value, 0.99)],
+                negation_score=0.0,
+                implicit_score=0.0,
+                model_version=self.model.version,
+            )
         timings["nlu_s"] = round(time.perf_counter() - t0, 4)
         base = dict(transcript=text, normalized_transcript=norm, prediction=pred, intent=pred.intent,
                     confidence=pred.score, confidence_meaning=self.model.manifest.get("confidence_meaning"))

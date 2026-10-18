@@ -111,8 +111,9 @@ class FasterWhisperASR(SpeechRecognizer):
                 continue
             valid_segs.append(s)
         text = " ".join(s.text.strip() for s in valid_segs).strip()
-        from ..nlu.normalizer import to_english
+        from ..nlu.normalizer import to_english, normalize_speech_transcript
         text = to_english(text)
+        text = normalize_speech_transcript(text)
         return ASRResult(
             text=text,
             language=info.language,
@@ -136,16 +137,19 @@ class FasterWhisperASR(SpeechRecognizer):
         if self.config.vad_filter and getattr(self.config, "vad_parameters", None):
             vad_kwargs["vad_parameters"] = self.config.vad_parameters
         no_speech_th = getattr(self.config, "no_speech_threshold", 0.6)
-        lang = language or getattr(self.config, "language", "en")
+        lang = language or getattr(self.config, "language", None)
+        beam_size = getattr(self.config, "beam_size", 5)
         segments, info = self.model.transcribe(
             audio,
             language=lang,
-            task="transcribe",  # transcribe in english/hinglish
-            beam_size=getattr(self.config, "beam_size", 1),
+            task="transcribe",
+            beam_size=beam_size,
+            best_of=beam_size,
             vad_filter=self.config.vad_filter,
             initial_prompt=self.config.initial_prompt,
             condition_on_previous_text=False,
             no_speech_threshold=no_speech_th,
+            temperature=[0.0, 0.2, 0.4],
             **vad_kwargs,
         )
         return list(segments), info
