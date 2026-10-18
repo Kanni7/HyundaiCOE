@@ -86,6 +86,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="bhashadrive")
     ap.add_argument("--json", action="store_true", help="print full structured result")
     ap.add_argument("--legacy-llm", action="store_true", help="V1 Ollama/Qwen pipeline (development benchmark only)")
+    ap.add_argument("--mock", action="store_true", help="use mock NLU/ASR pipeline (no heavy model weights required)")
     ap.add_argument("--profile", help="personalisation profile id (overrides BD_PROFILE_ID)")
     ap.add_argument("--asr-model", help="tiny | base | small | medium (overrides BD_ASR_MODEL)")
     ap.add_argument("--llm-model", help="Ollama tag, e.g. qwen2.5:1.5b (overrides BD_LLM_MODEL)")
@@ -104,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "serve":
         from .api.server import run
 
-        run(cfg, host=args.host, port=args.port, legacy=args.legacy_llm)
+        run(cfg, host=args.host, port=args.port, legacy=args.legacy_llm, mock=args.mock)
         return 0
 
     from .audio.asr import ASRUnavailableError
@@ -112,7 +113,13 @@ def main(argv: list[str] | None = None) -> int:
     from .nlu.encoder import EncoderUnavailableError
 
     try:
-        if args.legacy_llm:
+        if args.mock:
+            from .audio.asr import MockASR
+            from .tests.fakes_v2 import make_pipeline
+
+            pipe = make_pipeline()
+            pipe.asr = MockASR("pause the music")
+        elif args.legacy_llm:
             from .pipeline import build_default_pipeline
 
             pipe = build_default_pipeline(cfg, with_asr=args.cmd in ("file", "mic"))
@@ -120,9 +127,17 @@ def main(argv: list[str] | None = None) -> int:
             from .pipeline_v2 import build_v2_pipeline
 
             pipe = build_v2_pipeline(cfg, with_asr=args.cmd in ("file", "mic"))
-    except (LLMUnavailableError, ASRUnavailableError, EncoderUnavailableError) as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        return 2
+    except (LLMUnavailableError, ASRUnavailableError, EncoderUnavailableError, FileNotFoundError, Exception) as exc:
+        if not args.mock and not args.legacy_llm:
+            print(f"[NOTE] Model weights not found ({exc}). Starting in mock mode for testing.", file=sys.stderr)
+            from .audio.asr import MockASR
+            from .tests.fakes_v2 import make_pipeline
+
+            pipe = make_pipeline()
+            pipe.asr = MockASR("pause the music")
+        else:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
 
     if args.cmd == "text":
         _print(pipe.process_text(" ".join(args.utterance)), args.json)

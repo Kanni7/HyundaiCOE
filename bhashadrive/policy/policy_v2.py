@@ -84,8 +84,19 @@ class PolicyV2:
         if it == IntentV2.UNSUPPORTED:
             return PolicyOutcomeV2(DecisionV2.REJECT, "unsupported_request")
         if it == IntentV2.AMBIGUOUS:
-            return PolicyOutcomeV2(DecisionV2.CLARIFY, "ambiguous",
-                                   question="Which setting should I change: temperature, fan, volume or media?")
+            if re.search(r"\b(temperature|taapmaan|climate|cabin|garmi|thand|cold|hot|warm)\b", text, re.I):
+                q = "Did you want to set the temperature, or make the cabin warmer or cooler?"
+            elif re.search(r"\b(fan|blower|airflow|pankh\w*|hawa)\b", text, re.I):
+                q = "Did you want to increase or decrease the fan speed?"
+            elif re.search(r"\b(volume|awaaz|aawaz|awaz|sound|audio)\b", text, re.I):
+                q = "Did you want to turn the volume up or down?"
+            elif re.search(r"\b(music|song|track|gaana|gana)\b", text, re.I):
+                q = "Did you want to play, pause, or change the song?"
+            elif re.search(r"\b(ac|air\s*con\w*)\b", text, re.I):
+                q = "Did you want to turn the AC on or off, or change the temperature?"
+            else:
+                q = "Which setting should I change: temperature, fan, volume or media?"
+            return PolicyOutcomeV2(DecisionV2.CLARIFY, "ambiguous", question=q)
         if it in DIALOG_INTENTS:
             # Without a pending proposal a bare yes/no has nothing to act on.
             return PolicyOutcomeV2(DecisionV2.CLARIFY, "missing_context", SpeechActV2.DIALOG,
@@ -102,11 +113,15 @@ class PolicyV2:
             action = validate_action(build_action(it, text), self.limits)
         except ActionValidationError as e:
             if e.code == "missing_parameter":
-                return PolicyOutcomeV2(DecisionV2.CLARIFY, e.code, SpeechActV2.DIRECT_COMMAND,
-                                       question=f"I need a bit more detail: {e.message}?")
+                if "temperature" in e.message:
+                    msg = "What temperature would you like me to set (e.g. 22 degrees), or make it warmer or cooler?"
+                else:
+                    msg = f"I need a bit more detail: {e.message}?"
+                return PolicyOutcomeV2(DecisionV2.CLARIFY, e.code, SpeechActV2.DIRECT_COMMAND, question=msg)
             return PolicyOutcomeV2(DecisionV2.REJECT, e.code, SpeechActV2.DIRECT_COMMAND, question=f"I can't do that: {e.message}.")
         params = action.parameters.model_dump(exclude_none=True)
         if (pred.implicit_score or 0.0) >= self.imp_th:
             return PolicyOutcomeV2(DecisionV2.ASK_CONFIRMATION, "implicit_request", SpeechActV2.IMPLICIT_REQUEST, action,
+
                                    question=f"Would you like me to {action.describe()}?", params=params)
         return PolicyOutcomeV2(DecisionV2.EXECUTE, "explicit_command", SpeechActV2.DIRECT_COMMAND, action, params=params)

@@ -5,99 +5,99 @@
       {
         "model": "logreg",
         "C": 0.5,
-        "val_macro_f1": 0.5282
+        "val_macro_f1": 0.6042
       },
       {
         "model": "linear_svm",
         "C": 0.0625,
-        "val_macro_f1": 0.5466
+        "val_macro_f1": 0.6261
       },
       {
         "model": "logreg",
         "C": 1,
-        "val_macro_f1": 0.5472
+        "val_macro_f1": 0.6329
       },
       {
         "model": "linear_svm",
         "C": 0.125,
-        "val_macro_f1": 0.5544
+        "val_macro_f1": 0.6542
       },
       {
         "model": "logreg",
         "C": 2,
-        "val_macro_f1": 0.566
+        "val_macro_f1": 0.6569
       },
       {
         "model": "linear_svm",
         "C": 0.25,
-        "val_macro_f1": 0.5845
+        "val_macro_f1": 0.6793
       },
       {
         "model": "logreg",
         "C": 4,
-        "val_macro_f1": 0.5836
+        "val_macro_f1": 0.6689
       },
       {
         "model": "linear_svm",
         "C": 0.5,
-        "val_macro_f1": 0.5959
+        "val_macro_f1": 0.6879
       },
       {
         "model": "logreg",
         "C": 8,
-        "val_macro_f1": 0.5893
+        "val_macro_f1": 0.6832
       },
       {
         "model": "linear_svm",
         "C": 1.0,
-        "val_macro_f1": 0.6147
+        "val_macro_f1": 0.7096
       },
       {
         "model": "logreg",
         "C": 16,
-        "val_macro_f1": 0.5911
+        "val_macro_f1": 0.6931
       },
       {
         "model": "linear_svm",
         "C": 2.0,
-        "val_macro_f1": 0.6331
+        "val_macro_f1": 0.7359
       },
       {
         "model": "logreg",
         "C": 32,
-        "val_macro_f1": 0.5915
+        "val_macro_f1": 0.7009
       },
       {
         "model": "linear_svm",
         "C": 4.0,
-        "val_macro_f1": 0.6292
+        "val_macro_f1": 0.7497
       }
     ],
     "best": {
       "logreg": {
         "C": 32,
-        "val_macro_f1": 0.5915
+        "val_macro_f1": 0.7009
       },
       "linear_svm": {
-        "C": 2.0,
-        "val_macro_f1": 0.6331
+        "C": 4.0,
+        "val_macro_f1": 0.7497
       }
     },
-    "temperature": 1.1884,
-    "val_ece_raw": 0.0775,
-    "val_ece_calibrated": 0.0537,
+    "temperature": 1.0972,
+    "val_ece_raw": 0.0404,
+    "val_ece_calibrated": 0.0378,
     "thresholds": {
-      "min_score": 0.925,
-      "min_margin": 0.0,
-      "val_wrong_execution_rate": 0.0,
-      "val_coverage_of_correct_exec": 0.2414,
-      "val_accepted": 35,
+      "min_score": 0.95,
+      "min_margin": 0.15,
+      "val_wrong_execution_rate": 0.0408,
+      "val_coverage_of_correct_exec": 0.2442,
+      "val_accepted": 98,
       "target_risk": 0.02,
       "met_target": true
     },
-    "val_negation_acc": 0.9907,
-    "val_implicit_acc": 0.9833,
-    "artifacts": "artifacts\\nlu\\minilm_torch"
+    "val_negation_acc": 0.9843,
+    "val_implicit_acc": 0.9615,
+    "artifacts": "artifacts\\nlu\\runtime"
   },
   "minilm_onnx_int8": {
     "key": "minilm_onnx_int8",

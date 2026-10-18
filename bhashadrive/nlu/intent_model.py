@@ -47,9 +47,16 @@ class IntentModel:
         if not heads_path.is_file():
             raise EncoderUnavailableError(f"Classifier heads not found: {heads_path}")
         enc = manifest["encoder"]
-        if not enc.get("onnx"):
-            raise EncoderUnavailableError("Runtime requires an ONNX encoder artifact (backend onnx_fp32/onnx_int8).")
-        encoder = OnnxSentenceEncoder(root / enc["onnx"], root / enc["tokenizer_dir"], threads=threads)
+        if enc.get("onnx") and (root / enc["onnx"]).is_file():
+            encoder = OnnxSentenceEncoder(root / enc["onnx"], root / enc["tokenizer_dir"], threads=threads)
+        elif enc.get("dir") and (root / enc["dir"]).exists():
+            from .encoder import TorchSentenceEncoder
+            encoder = TorchSentenceEncoder(root / enc["dir"])
+        elif enc.get("tokenizer_dir") and (root / enc["tokenizer_dir"]).exists():
+            from .encoder import TorchSentenceEncoder
+            encoder = TorchSentenceEncoder(root / enc["tokenizer_dir"])
+        else:
+            raise EncoderUnavailableError("Runtime requires an ONNX or local PyTorch encoder artifact.")
         with np.load(heads_path) as h:
             heads = {k: h[k] for k in h.files}
         return cls(manifest, heads, encoder)

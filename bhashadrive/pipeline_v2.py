@@ -81,6 +81,14 @@ class BhashaDrivePipelineV2:
         self.store, self.matcher, self.profile_id = store, matcher, profile_id
         c = self.config.context
         self.state = DialogState(c.pending_ttl_s, c.followup_ttl_s, c.max_turns)
+        try:
+            from .nlu.rescorer import PhoneticAttentionRescorer
+            if hasattr(self.model, "encoder") and getattr(self.model, "encoder") is not None:
+                self.rescorer = PhoneticAttentionRescorer(self.model)
+            else:
+                self.rescorer = None
+        except Exception:
+            self.rescorer = None
 
     # ---- audio entry points -----------------------------------------------
     def process_audio_file(self, path: str | Path) -> ResultV2:
@@ -116,6 +124,8 @@ class BhashaDrivePipelineV2:
             return ResultV2(transcript=text or "", decision=DecisionV2.CLARIFY, reason_code="empty_transcript",
                             response_text="I didn't catch that. Could you repeat?", timings_s=timings)
         t0 = time.perf_counter()
+        if getattr(self, "rescorer", None) is not None:
+            norm, _ = self.rescorer.rescore(norm)
         pred, emb = self.model.predict(norm)
         timings["nlu_s"] = round(time.perf_counter() - t0, 4)
         base = dict(transcript=text, normalized_transcript=norm, prediction=pred, intent=pred.intent,
@@ -312,7 +322,17 @@ def build_v2_pipeline(config: AppConfig | None = None, with_asr: bool = True, wi
     config = config or AppConfig()
     rt = config.runtime
     model = IntentModel.load(rt.root / rt.nlu_artifacts, rt.root, threads=rt.nlu_threads)
-    asr = SherpaWhisperASR(config.sherpa) if with_asr else None
+    asr = None
+    if with_asr:
+        try:
+            from .audio.hybrid_asr import HybridASR
+            asr = HybridASR(config)
+        except Exception:
+            try:
+                from .audio.sherpa_asr import SherpaWhisperASR
+                asr = SherpaWhisperASR(config.sherpa)
+            except Exception:
+                asr = None
     store = matcher = None
     if with_personalization:
         store = PersonalCommandStore(db_path or rt.root / rt.profile_db, store_correction_history=rt.store_corrections)
